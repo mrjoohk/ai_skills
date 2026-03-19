@@ -1,8 +1,8 @@
-    ---
-    name: uf-if-debug-mapper
-    description: "Maps anticipated issues by UF/IF to concrete code locations and a human-in-the-loop debugging plan (what to inspect, logs to add, breakpoints, repro steps)."
-    user-invocable: true
-    allowed-tools: Read, Write
+---
+name: uf-if-debug-mapper
+description: "Maps UF/IF issues to code locations and generates a human-in-the-loop debugging plan."
+user-invocable: true
+allowed-tools: Read, Write
 ---
 
 # UF/IF Debug Mapper

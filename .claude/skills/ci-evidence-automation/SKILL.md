@@ -1,8 +1,8 @@
-    ---
-    name: ci-evidence-automation
-    description: "Automates CI checks, coverage gates, evidence packs, and regression reporting."
-    user-invocable: true
-    allowed-tools: Read, Write
+---
+name: ci-evidence-automation
+description: "Automates CI checks, coverage gates, evidence packs, and regression reporting."
+user-invocable: true
+allowed-tools: Read, Write
 ---
 
 # CI Evidence Automation

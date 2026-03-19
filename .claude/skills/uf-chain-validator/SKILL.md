@@ -1,8 +1,8 @@
-    ---
-    name: uf-chain-validator
-    description: "Validates UF-chain integrity, I/O contracts, tests, and evidence linkage."
-    user-invocable: true
-    allowed-tools: Read, Write
+---
+name: uf-chain-validator
+description: "Validates UF-chain integrity, I/O contracts, tests, and evidence linkage."
+user-invocable: true
+allowed-tools: Read, Write
 ---
 
 # UF Chain Validator

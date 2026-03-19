@@ -1,42 +1,56 @@
-    ---
-    name: sim-physics-auditor
-    description: "Audits physics consistency (units, Nyquist, PRF, Doppler, dynamics) and assumptions."
-    user-invocable: true
-    allowed-tools: Read, Write
+---
+name: sim-physics-auditor
+description: "Audits physics and simulation consistency: units, dimensions, coordinate frames, numerical stability, and domain-specific invariants."
+user-invocable: true
+allowed-tools: Read, Write
 ---
 
 # Sim Physics Auditor
 
-Audits physics and simulation consistency for SAR and UAV dynamics:
-- units and dimensions
-- coordinate frames
-- Nyquist, PRF vs Doppler bandwidth
-- bandwidth/resolution relations
-- stability checks for control loops
+Audits physics simulation consistency and numerical accuracy:
+- Units and Dimensions validation
+- Coordinate Frames consistency verification
+- Sampling theory compliance (Nyquist, time resolution, etc.)
+- Numerical stability verification (control loops, integrators, filters)
+- Bandwidth·resolution relationship verification
+- Equation equivalence validation for cross-language porting
+
+---
 
 ## When to Use
-- Before trusting numeric results
-- When changing radar/platform parameters
-- When porting equations between languages (C/Fortran/Python/C#)
+- Always before trusting numerical results
+- When changing simulation parameters (frequency, velocity, sample rate, step size, etc.)
+- When porting physics equations to different languages/frameworks (e.g., Python → C++ → C#)
+- When changing control loop or filter design
+- When adding new physics domain modules (signal processing, dynamics, optics, acoustics, etc.)
+
+---
 
 ## Inputs
-- Equations + assumptions
-- Parameter ranges (fc, B, v, altitude, look angle, PRF)
-- Expected outputs (resolution, swath, SNR proxy, stability margins)
+- Equations, formulas and assumptions
+- Parameter ranges (frequency, velocity, step size, lookup range, etc.)
+- Expected outputs (resolution, error bounds, SNR proxy, stability margin, etc.)
+- Domain hints (signal processing / dynamics / optics / thermal / control, etc.)
+
+---
 
 ## Output
-- checklist PASS/WARN/FAIL
-- suspected inconsistent equations
-- recommended validation experiments
-- acceptance thresholds and plots to generate
+- **PASS / WARN / FAIL checklist**
+- List of suspected equation mismatches (path·symbol references)
+- Recommended verification experiment plan
+- Acceptance thresholds and list of plots to generate
+
+---
 
 ## MCP Integration
-- `mcp.shell`: run parameter sweeps, generate plots, compute metrics
-- `mcp.filesystem`: store sweep configs + results
-- optional `mcp.github`: open issues for physics inconsistencies
+- `mcp.shell`: run parameter sweeps, generate plots, calculate metrics
+- `mcp.filesystem`: store sweep configuration and results in `reports/physics/`
+- `mcp.github` (optional): open physics mismatch issues
+
+---
 
 ## Token Saving
-- Use short symbolic representations and point to files for full derivations.
-- Store plots and raw results under `reports/physics/`.
+- Use brief symbol notation; store full derivations as file references.
+- Store plots and raw results in `reports/physics/`.
 
 See `reference.md` and `examples.md`.

@@ -1,108 +1,102 @@
 # Reference: UF/IF Debug Map Template
 
-Create `docs/uf_if_debug_map.md` with the following sections.
+Generate `docs/uf_if_debug_map.md` with the following section structure.
 
 ---
 
-## 0. Scope and Assumptions
+## 0. Scope & Assumptions
+```
 - Project:
 - Commit:
 - Date:
-- UF Range:
-- IF Range:
-- Runtime constraints:
-- Hardware constraints (GPU/CPU/RAM):
+- UF Scope:
+- IF Scope:
+- Runtime Constraints:
+- Hardware Constraints (GPU/CPU/RAM):
+```
 
 ---
 
-## 1. UF → Code Map (Primary Table)
+## 1. UF → Code Mapping (Primary Table)
 
-| UF-ID | Goal | Key Modules | Entry Points (path::symbol) | Data In/Out | Invariants | Tests | Evidence |
-|------:|------|-------------|-----------------------------|------------|-----------|------|---------|
+| UF-ID | Goal | Core Modules | Entry Point (path::symbol) | Data In/Out | Invariants | Tests | Evidence |
+|------:|------|---------|-----------------|------------|-----------------|------|------|
 
-**Notes:**
-- Key Modules: minimal set of files relevant to the UF.
-- Entry Points: exact function/class names where execution starts.
-- Invariants: things that must remain true (units, shape, monotonic indices, buffer sizes).
-- Evidence: report/log paths.
-
----
-
-## 2. IF → Code Map (Interface/Integration Table)
-
-| IF-ID | Interface Contract | Producer | Consumer | Wire/IPC/ABI | Failure Modes | Debug Hooks |
-|------:|--------------------|----------|----------|--------------|--------------|------------|
-
-**Failure Modes Examples**
-- schema mismatch (fields missing)
-- endian/packing alignment
-- timing/latency jitter
-- stale shared memory ring buffer
-- multicast join/drop issues
+**Column descriptions:**
+- **Core Modules:** Minimal file list related to UF
+- **Entry Point:** Exact function/class name where execution starts
+- **Invariants:** Conditions that must be maintained (units, shape, monotonic index, buffer size, etc.)
+- **Evidence:** Report/log paths
 
 ---
 
-## 3. Symptom → Likely Root Cause → Where to Debug
+## 2. IF → Code Mapping (Interface/Integration Table)
 
-| Symptom | Likely Root Causes | First Places to Inspect (paths::symbols) | Quick Checks | Repro Command |
-|--------|---------------------|------------------------------------------|-------------|--------------|
+| IF-ID | Interface Contract | Producer | Consumer | Communication (Wire/IPC/ABI) | Failure Modes | Debug Hooks |
+|------:|-----------------|----------|----------|----------------------|---------|---------|
 
-Examples of symptoms:
+**Common failure modes:**
+- Schema mismatch (missing fields)
+- Serialization alignment/endianness errors
+- Timing/latency jitter
+- Shared memory ring buffer delays
+- Network multicast join/drop
+
+---
+
+## 3. Symptom → Root Cause → Debug Location
+
+| Symptom | Expected Root Cause | First Check Location (path::symbol) | Quick Verification | Repro Command |
+|-----|-------------|------------------------|------------|---------|
+
+**Common symptoms:**
 - OOM / VRAM spike
-- wrong SAR resolution
-- PRF/Nyquist aliasing
-- unstable control loop at 120 Hz
-- missing RAG grounding/citations
-- CI coverage gate failure
+- Numerical error or divergence
+- Performance degradation (throughput/latency targets missed)
+- Interface contract mismatch (schema error, null values)
+- Test coverage gate failure
+- Non-deterministic output (different results per run)
 
 ---
 
 ## 4. Debug Playbooks (Copy/Paste)
 
-### 4.1 Fast Triage (5–10 min)
-1. Confirm reproduction steps
-2. Collect logs and environment snapshot
-3. Identify the UF/IF involved
-4. Jump to mapped entry points
+### 4.1 Quick Triage (5-10 minutes)
+1. Verify repro steps
+2. Collect logs and environment snapshots
+3. Identify related UF/IF
+4. Navigate to mapped entry point
 
-### 4.2 Instrumentation (Minimal)
-- Add structured logs with keys: uf_id, if_id, shape, dtype, units, frame, timestamps
-- Add sanity assertions for invariants (guarded by debug flag)
-- Store logs under `reports/debug/<timestamp>/`
+### 4.2 Minimal Instrumentation
+- Structured log keys: `uf_id, if_id, shape, dtype, units, frame, timestamp`
+- Add invariant validation assertions (controlled by debug flag)
+- Save logs: `reports/debug/<timestamp>/`
 
-### 4.3 Breakpoints and Watchpoints
-- List recommended breakpoints by UF/IF:
-  - file::function + line hint
-- Watch for:
-  - shape changes
-  - units conversion points
-  - buffer/ring indices
-  - kernel allocations
+### 4.3 Breakpoints & Watchpoints
+- Recommended breakpoints per UF/IF:
+  - `file::function` + line hints
+- Watch items:
+  - Shape change points
+  - Unit conversion points
+  - Buffer/ring index boundaries
 
-### 4.4 Profiling / Performance
-- GPU:
-  - `nvidia-smi` snapshots
-  - optional: Nsight Systems/Nsight Compute
-- CPU:
-  - cProfile/perf
-- Record:
-  - peak memory
-  - throughput
-  - latency/jitter (for 120 Hz loops)
+### 4.4 Profiling / Performance Analysis
+- **GPU:** `nvidia-smi` snapshots; Nsight Systems/Compute (if needed)
+- **CPU:** `cProfile`, `perf`, `py-spy`
+- **Memory:** `memory_profiler`, `tracemalloc`
+- **Metrics:** peak memory, throughput, latency/jitter
 
 ---
 
 ## 5. Minimal Fix Patterns
-- Fix the smallest surface area first (one module, one contract).
-- Prefer patch/diff format.
-- Keep refactor-only commits separate from behavior changes.
+- Fix from narrowest scope first (single module, single contract).
+- Provide in patch (diff) format.
+- Keep refactoring and behavior changes in separate commits.
 
 ---
 
 ## 6. Evidence Outputs (Required)
-- `reports/uf_if_debug_map.md` (or the map itself)
+- `reports/uf_if_debug_map.md`
 - `reports/debug/<run>/logs.txt`
 - `evidence_pack/metrics.yaml` (pass/fail thresholds)
-- `coverage.xml` (if tests changed)
-
----
+- `coverage.xml` (if test changes made)
