@@ -1,87 +1,56 @@
-# GLOBAL_RULES.md (Claude Code Skills Pack)
+# CLAUDE.md
+## Execution Instructions for Claude Code
 
-These global rules apply to all skills in this pack.
+You are tasked with implementing a Defense-domain sLLM Agent System according to requirements.md.
 
-## Non-negotiables
-1. **Be unambiguous.** Every requirement must be testable and measurable.
-2. **Define contracts.** For any function/module: Inputs, Outputs, Constraints, Failure modes.
-3. **Evidence-first.** Every significant claim must have an associated artifact: tests, logs, plots, benchmarks, or run metadata.
-4. **Minimize token usage.** Prefer references to file paths and concise diffs over dumping large code blobs.
-5. **Safe-by-default.** Avoid generating sensitive/regulated content. Keep domain-specific work at a high-level engineering focus unless explicitly scoped and authorized.
+You MUST follow the exact execution order below.
 
 ---
+# WORKFLOW RULES
 
-## Design Process (core-engineering)
+### Rule 1 — Review Before Creating Output
+> Before creating any final deliverable (document, file), first share the analysis/investigation summary with the user and wait for approval.
 
-All design work follows this 8-stage process:
+**Flow**: Start task → Perform analysis → Present findings to user → Await approval → Create output
 
+### Rule 2 — Preserve Analysis as MD Files
+> Save all analysis/investigation content created during tasks as MD files for reuse in future tasks.
+
+**Filename convention**: `YYMMDD_HHMM_[description].md`
+Example: `260318_1430_uf_status_analysis.md`
+
+### Rule 3 — State Judgment Rationale
+> Every decision, choice, or recommendation must include the rationale (판단 근거).
+
+**Apply**: Include a "판단 근거:" section in all analysis MD files and user reports.
+
+### Rule 4 — File Creation Log
+> All files created in the working folder must be logged in `0.FilesUpdate.xlsx`.
+> **If `0.FilesUpdate.xlsx` does not exist, create it first, then record the entry.**
+
+| Column | Content |
+|--------|---------|
+| 일시 | YYYY-MM-DD HH:MM |
+| 파일명 | Created filename |
+| 요청 요약 | Core content of user's request |
+
+### Rule 5 — Output Format Standard
+> Deliverables containing tables or figures must be created as `.docx`.
+
+| Condition | Format |
+|-----------|--------|
+| Contains table or figure | `.docx` |
+| Text-focused analysis/memo | `.md` |
+| Data/numeric-focused | `.xlsx` |
+| Slide presentation | `.pptx` |
+
+### Workflow Summary
 ```
-Stage 1  Problem Definition              →  problem_statement.md
-Stage 2  Problem Review and Clarification →  clarification_log.md
-Stage 3  Problem Elaboration             →  assumptions_and_constraints.md
-Stage 4  Requirements Derivation         →  requirements.md  (REQ blocks)
-Stage 5  Integration Function (IF) Derivation   →  if_list.md
-Stage 6  Integration Function Decomposition    →  if_decomposition.md
-Stage 7  Unit Function (UF) Derivation         →  uf.md  (UF blocks)
-Stage 8  Verification & Evidence Planning      →  verification_plan.md, evidence_pack/
+Receive request
+  → Perform analysis/investigation
+  → [Rule 3] Summarize with judgment rationale
+  → [Rule 1] Present to user for review → Await approval
+  → Create output
+  → [Rule 2] Save analysis as MD (yymmdd_hhmm_*.md)
+  → [Rule 4] Update 0.FilesUpdate.xlsx
 ```
-
----
-
-## Standard Output Formats
-
-### Requirement Block (REQ-###)
-- **ID:** (REQ-###)
-- **Context:**
-- **Inputs:**
-- **Outputs:**
-- **Constraints:**
-- **Acceptance Criteria:** (Given/When/Then + numeric thresholds)
-- **Tests:** (unit/integration/e2e)
-- **Evidence:** (paths to artifacts)
-
-### IF Block (IF-##)
-- **IF-ID:** (IF-##)
-- **Description:**
-- **Producer:**
-- **Consumer:**
-- **Input Contract:** (type, unit/shape, range)
-- **Output Contract:** (type, unit/shape, range)
-- **Constraints:** (timing, protocol, serialization)
-- **Failure Modes:**
-- **Linked REQs:** (REQ-###)
-
-### UF Block (UF-##)
-- **UF-ID:** (UF-##)
-- **Parent IF:** (IF-##)
-- **Goal:**
-- **I/O Contract:**
-- **Algorithm Summary:**
-- **Edge Cases:**
-- **Verification Plan:**
-- **Evidence Pack Fields:** scenario_id, run_id, metrics, environment, commit_sha
-
----
-
-## Token-Saving Rules (Do This)
-- Refer to code using **paths and symbols** (e.g., `src/pipeline/processor.py::process()`).
-- Ask for **minimal context**: file tree, specific functions, error logs.
-- Prefer **patches/diffs** over full files.
-- Split large changes into staged commits: (1) refactor, (2) behavior change, (3) tests/bench.
-
----
-
-## Agent Orchestration Conventions
-- **Agent-1 (Architect):** Design process Stage 1~7 — requirement/spec decomposition, IF/UF definition
-- **Agent-2 (Builder):** Implementation with minimal diffs
-- **Agent-3 (Verifier):** Stage 8 — tests, benchmarks, evidence pack, CI gates
-
-Handoff format:
-- **From Agent:** (1/2/3)
-- **To Agent:** (1/2/3)
-- **Objective:**
-- **Context Links:** (file paths, issue IDs)
-- **Deliverables:**
-- **Constraints:**
-- **Acceptance Tests:**
-- **Evidence Outputs:**
