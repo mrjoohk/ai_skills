@@ -120,4 +120,13 @@ Date: <date>  |  Total Time: <hours>
 - The orchestrator (current session) does not intervene in subagent intermediate processes.
 - Each subagent's task_prompt must be **self-contained** (no external context dependency).
 
-See `reference.md` for file format details and `examples.md` for example runs.
+See `references/reference.md` for file format details and `references/examples.md` for example runs.
+
+---
+
+## Bundled Resources
+
+| Resource | When to use |
+|---|---|
+| `references/reference.md` | Agent role file format, report structure details |
+| `references/examples.md` | Example prompts and expected outputs |

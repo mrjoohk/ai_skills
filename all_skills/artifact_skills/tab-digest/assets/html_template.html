@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📋 탭 다이제스트 — {{DATE}}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+      color: white;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .site-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    .site-header .meta { margin-top: 0.4rem; opacity: 0.85; font-size: 0.95rem; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      justify-content: center;
+      padding: 1.25rem 1.5rem;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .filter-btn {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1.5px solid #cbd5e1;
+      background: white;
+      color: #475569;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .filter-btn:hover { border-color: #6366f1; color: #6366f1; }
+    .filter-btn.active { background: #6366f1; border-color: #6366f1; color: white; font-weight: 600; }
+
+    /* ── Card grid ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Individual card ── */
+    .card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex; flex-direction: column;
+    }
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .card.hidden { display: none; }
+
+    .card-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .card-title {
+      font-size: 1.05rem; font-weight: 700; line-height: 1.35;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-title a { color: #1e293b; text-decoration: none; }
+    .card-title a:hover { color: #6366f1; text-decoration: underline; }
+    .card-meta { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+    /* Category badges */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-글아티클    { background: #dbeafe; color: #1d4ed8; }
+    .badge-도구라이브러리 { background: #dcfce7; color: #166534; }
+    .badge-튜토리얼가이드 { background: #fef3c7; color: #92400e; }
+    .badge-공식문서    { background: #ede9fe; color: #5b21b6; }
+    .badge-뉴스        { background: #fee2e2; color: #991b1b; }
+    .badge-영상        { background: #fce7f3; color: #9d174d; }
+    .badge-기타        { background: #f1f5f9; color: #475569; }
+    .badge-known       { background: #fef3c7; color: #92400e; }  /* ⚠️ 일반 지식 기반 */
+    .badge-failed      { background: #fee2e2; color: #991b1b; }  /* ❌ 접근 불가 */
+
+    /* TL;DR box */
+    .tldr-box {
+      margin: 0.75rem 1.25rem;
+      padding: 0.7rem 1rem;
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #78350f;
+    }
+    .tldr-label { font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; display: block; margin-bottom: 0.25rem; }
+
+    /* Summary */
+    .card-summary {
+      padding: 0 1.25rem 0.5rem;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: #475569;
+    }
+    details summary {
+      cursor: pointer;
+      color: #6366f1;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.25rem 0;
+      list-style: none;
+      user-select: none;
+    }
+    details summary::before { content: '▶ '; font-size: 0.7rem; }
+    details[open] summary::before { content: '▼ '; }
+    details[open] .summary-text { margin-top: 0.5rem; }
+
+    /* Action items */
+    .action-items {
+      margin: 0.5rem 1.25rem 1rem;
+      padding: 0.85rem 1rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+    }
+    .action-section { margin-bottom: 0.75rem; }
+    .action-section:last-child { margin-bottom: 0; }
+    .action-label {
+      font-weight: 700; font-size: 0.8rem; color: #374151;
+      margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.3rem;
+    }
+    .action-items ul, .action-items ol { padding-left: 1.4rem; }
+    .action-items li { margin: 0.25rem 0; line-height: 1.55; color: #374151; }
+    .action-items a { color: #6366f1; word-break: break-all; }
+
+    pre.cmd-block {
+      background: #1e293b;
+      color: #a5f3fc;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      font-family: 'SFMono-Regular', 'Consolas', 'Menlo', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: 0.3rem;
+    }
+
+    /* Failed card */
+    .card-failed .card-header { background: #fff5f5; }
+    .failed-url { word-break: break-all; font-size: 0.8rem; color: #64748b; padding: 0.75rem 1.25rem 1rem; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #94a3b8;
+    }
+    .empty-state p { font-size: 1.1rem; margin-top: 0.5rem; }
+
+    /* Footer */
+    .site-footer {
+      text-align: center;
+      padding: 2rem;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SITE HEADER ──────────────────────────────────────────── -->
+<header class="site-header">
+  <h1>📋 탭 다이제스트</h1>
+  <p class="meta">{{DATE}} &nbsp;·&nbsp; {{COUNT}}개 페이지 분석</p>
+</header>
+
+<!-- ── FILTER BAR ────────────────────────────────────────────── -->
+<nav class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-cat="all" onclick="filterCards('all', this)">전체</button>
+  <!-- Claude: add one button per category that appears in the data, e.g.: -->
+  <!-- <button class="filter-btn" data-cat="도구/라이브러리" onclick="filterCards('도구/라이브러리', this)">🛠 도구/라이브러리</button> -->
+  {{FILTER_BUTTONS}}
+</nav>
+
+<!-- ── CARD GRID ─────────────────────────────────────────────── -->
+<main class="card-grid" id="cardGrid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       Claude: insert one .card block per URL here.
+       Copy the appropriate template below and fill in values.
+       ══════════════════════════════════════════════════════════ -->
+
+  {{CARDS}}
+
+  <!-- Empty state (shown by JS when all cards are filtered out) -->
+  <div class="empty-state" id="emptyState" style="display:none">
+    <span style="font-size:3rem">🔍</span>
+    <p>해당 카테고리의 페이지가 없습니다.</p>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  Tab Digest · {{DATE}} 생성
+</footer>
+
+<!-- ── CARD TEMPLATES (reference only — delete before final output) ──
+
+NORMAL CARD (status: ok or known):
+────────────────────────────────────
+<article class="card" data-cat="도구/라이브러리">
+  <div class="card-header">
+    <p class="card-title"><a href="https://example.com" target="_blank" rel="noopener">페이지 제목</a></p>
+    <div class="card-meta">
+      <span class="badge badge-도구라이브러리">도구/라이브러리</span>
+      <!-- If status=known: -->
+      <span class="badge badge-known">⚠️ 일반 지식 기반</span>
+    </div>
+  </div>
+
+  <div class="tldr-box">
+    <span class="tldr-label">한 줄 요약</span>
+    한 줄로 핵심을 설명하는 한국어 문장이 여기 들어갑니다.
+  </div>
+
+  <div class="card-summary">
+    <details>
+      <summary>자세히 보기</summary>
+      <div class="summary-text">
+        3~5문장의 한국어 요약 내용이 여기 들어갑니다. 이 페이지에서 무엇을 배울 수 있는지,
+        어떤 문제를 해결하는지, 주요 특징이 무엇인지를 설명합니다.
+      </div>
+    </details>
+  </div>
+
+  <div class="action-items">
+    <div class="action-section">
+      <div class="action-label">📥 다운로드</div>
+      <ul>
+        <li><a href="https://example.com/download">한국어 라벨 (파일명)</a></li>
+      </ul>
+    </div>
+    <div class="action-section">
+      <div class="action-label">👣 따라할 단계</div>
+      <ol>
+        <li>첫 번째 단계를 한국어로 설명합니다.</li>
+        <li>두 번째 단계를 한국어로 설명합니다.</li>
+      </ol>
+    </div>
+    <div class="action-section">
+      <div class="action-label">💻 실행 명령어</div>
+      <pre class="cmd-block">pip install example-package
+example-command --flag value</pre>
+    </div>
+  </div>
+</article>
+
+FAILED CARD (status: failed):
+────────────────────────────────────
+<article class="card card-failed" data-cat="기타">
+  <div class="card-header">
+    <p class="card-title">페이지 접근 불가</p>
+    <div class="card-meta">
+      <span class="badge badge-failed">❌ 접근 불가</span>
+    </div>
+  </div>
+  <p class="failed-url">https://example.com/unknown-page</p>
+</article>
+
+END TEMPLATES ── -->
+
+<script>
+  function filterCards(cat, btn) {
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Show/hide cards
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = cat === 'all' || card.dataset.cat === cat;
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+
+    // Empty state
+    document.getElementById('emptyState').style.display = visible === 0 ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>

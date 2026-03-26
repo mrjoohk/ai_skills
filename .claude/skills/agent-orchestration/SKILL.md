@@ -115,4 +115,15 @@ reports/orchestration_report_<timestamp>.md
 | Agent-2 (Builder) | Minimal diff implementation | Implementation |
 | Agent-3 (Verifier) | Validation·Testing·Evidence Pack·CI | Stage 8 |
 
-See `reference.md` for Handoff templates and `examples.md` for example prompts.
+See `references/reference.md` for handoff templates and `references/examples.md` for example prompts.
+
+---
+
+## Bundled Resources
+
+| Resource | When to use |
+|---|---|
+| `references/reference.md` | Handoff templates, dependency notation, tips |
+| `references/examples.md` | Example prompts and expected outputs |
+| `assets/agent-role-template.md` | Template for individual agent role files — copy to `agents/agent-N-role.md` |
+| `assets/orchestration-plan-template.md` | Template for `agents/orchestration_plan.md` |

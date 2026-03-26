@@ -44,13 +44,39 @@ Example: `260318_1430_uf_status_analysis.md`
 | Data/numeric-focused | `.xlsx` |
 | Slide presentation | `.pptx` |
 
+### Rule 6 — Directory for Review Documents
+> All files (docx, ppt, xlsx, md) created during analysis/investigation phases must be saved in the `review_docs` directory.
+> **If `review_docs` does not exist, create it first.**
+
+**Apply to**: Any file produced during analysis, review, or investigation steps (before user approval).
+
+### Rule 7 — Directory for Output Documents
+> All files (docx, ppt, xlsx, md) created as final responses, results, or action outputs must be saved in the `output_docs` directory.
+> **If `output_docs` does not exist, create it first.**
+
+**Apply to**: Any file produced as a deliverable, response, or remediation result (after user approval).
+
+### Rule 8 — Prompt & Response Log
+> Every user request prompt and the agent's corresponding response/result must be recorded in order in `1.PromptsUpdate.xlsx`.
+> **If `1.PromptsUpdate.xlsx` does not exist, create it first.**
+
+| Column | Content |
+|--------|---------|
+| 일시 | YYYY-MM-DD HH:MM |
+| 요청 프롬프트 | Full text of the user's request |
+| 응답/결과/대처 | Summary of the agent's response or action taken |
+
 ### Workflow Summary
 ```
 Receive request
+  → [Rule 8] Log user prompt to 1.PromptsUpdate.xlsx
   → Perform analysis/investigation
   → [Rule 3] Summarize with judgment rationale
+  → [Rule 6] Save analysis files to review_docs/
   → [Rule 1] Present to user for review → Await approval
   → Create output
+  → [Rule 7] Save output files to output_docs/
   → [Rule 2] Save analysis as MD (yymmdd_hhmm_*.md)
   → [Rule 4] Update 0.FilesUpdate.xlsx
+  → [Rule 8] Log agent response to 1.PromptsUpdate.xlsx
 ```

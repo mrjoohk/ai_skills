@@ -39,7 +39,7 @@ Read the input documents and identify:
 
 ### Step 2 — Metric Selection
 Select metrics that match the domain and task type.
-Refer to `reference.md` for the metric list.
+Refer to `references/reference.md` for the metric list by domain.
 
 Selection criteria:
 - **Primary metric** (1 only): Core metric that determines model selection
@@ -115,8 +115,22 @@ Then <Primary metric> >= <Target> (p < 0.05, N=<sample count>)
 
 ---
 
+## Bundled Resources
+
+| Resource | When to use |
+|---|---|
+| `references/reference.md` | Domain metric tables (ML, Audio/Speech, NLP, CV) — consult at Step 2 |
+| `references/examples.md` | Example prompts and expected outputs for testing |
+| `scripts/validate_eval_plan.py` | Run after generating `evaluation_plan.md` to verify completeness |
+
+```bash
+python <skill_dir>/scripts/validate_eval_plan.py evaluation_plan.md
+```
+
+---
+
 ## Notes
 - Thresholds must **always be specified numerically**. "Higher is better" is not allowed.
 - Always indicate metric direction (↑/↓) to clarify whether higher or lower is better.
 - Select only 1 Primary metric — to keep the model selection criterion stable.
-- Domain metric reference: `reference.md`
+- Domain metric reference: `references/reference.md`
