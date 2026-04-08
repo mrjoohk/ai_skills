@@ -85,7 +85,11 @@ if-designer → if_list.md + if_decomposition.md
 **산출물:**
 - `requirements.md` (REQ 블록)
 - `if_list.md` (IF 경계 + I/O 계약)
-- `if_decomposition.md` (UF 후보 트리)
+- `if_decomposition.md` (UF 후보 트리 + 각 리프 노드의 `Verification Owner` 선언)
+
+**v2 변경사항:** `if_decomposition.md`의 각 리프 노드에 `Verification Owner` 필드 추가
+(`UF-local` / `guard-rail+chain` / `IF-acceptance`). 모든 리프가 독립 테스트 가능해야 한다는
+이전 가정 폐기.
 
 ---
 
@@ -98,6 +102,14 @@ if-designer → if_list.md + if_decomposition.md
 
 **산출물:**
 - `uf.md` (UF 블록 전체: 알고리즘 요약 + I/O 계약 + 엣지케이스 + 검증 계획)
+- `uf_split/uf_if01.md`, `uf_split/uf_if02.md`, … (IF별 UF 블록 동반 파일)
+
+**v2 변경사항:**
+- `Verification Plan` 구조 개편: `Ownership` / `Unit Verification` / `Chain Verification` 3개 서브 필드
+- `UF-local`: 독립 테스트 경로 + 커버리지 목표 필수
+- `guard-rail+chain`: 가드레일 테스트 + IF-체인 테스트 경로 필수, 독립 기능 테스트 불필요
+- `IF-acceptance`: IF-인수 테스트 경로만 필수
+- IF별 `uf_split/` 동반 파일 생성 추가
 
 ---
 
@@ -203,9 +215,19 @@ review_report.md
 
 **입력 → 출력:**
 ```
-uf.md + src/ + tests/ + evidence_pack/
-  → validation_report.md (PASS/FAIL + 누락 링크 목록)
+uf.md + if_list.md + src/ + tests/ + evidence_pack/
+  → validation_report.md (3개 게이트별 PASS/FAIL/WARN + 제안 수정)
 ```
+
+**v2 변경사항 — 3-Gate 구조:**
+
+| 게이트 | 검증 내용 |
+|--------|-----------|
+| **Gate 1** 구현/런타임 | I/O 계약, 체인 연속성, 런타임 스모크 테스트 |
+| **Gate 2** 문서-테스트 정합 | Ownership 선언 완결성, 소유권별 테스트 경로 존재 여부 |
+| **Gate 3** 증거 팩 완결성 | 증거 항목 누락, `uf_split/` 동기화 |
+
+**중요:** `guard-rail+chain` / `IF-acceptance` UF에 독립 기능 테스트가 없어도 자동 FAIL 아님.
 
 ---
 

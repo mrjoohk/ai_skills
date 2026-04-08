@@ -105,6 +105,10 @@ requirements.md
   → if_decomposition.md (IF → UF 후보 트리 + 의존성 그래프)
 ```
 
+**v2 변경사항:** 각 리프 노드에 `Verification Owner` 선언 필수 (`UF-local` / `guard-rail+chain` / `IF-acceptance`).
+모든 리프 노드가 독립 기능 테스트 대상이어야 한다는 이전 가정은 폐기. 컴포지션/어셈블리 노드는
+`guard-rail+chain` 또는 `IF-acceptance`로 분류.
+
 ---
 
 ### ③ uf-designer — UF 블록 명세 정의
@@ -118,9 +122,19 @@ requirements.md
 ```
 if_decomposition.md
   → uf.md (전체 UF 블록: 알고리즘 요약 + 엣지케이스 + 검증 계획)
+  → uf_split/uf_if01.md (IF-01 전용 UF 블록 뷰)
+  → uf_split/uf_if02.md (IF-02 전용 UF 블록 뷰)
+  → ... (IF별 1개 파일)
 ```
 
-**중요:** UF 설계 완료 후 `uf-chain-validator`를 1차 실행해 UF→IF 커버리지를 확인한 뒤 구현으로 진행.
+**v2 변경사항:**
+- `Verification Plan`이 3개 서브 필드로 구분: `Ownership` / `Unit Verification` / `Chain Verification`
+- `UF-local`: 독립 테스트 경로 + 커버리지 목표 필수
+- `guard-rail+chain`: 가드레일 테스트 + IF-체인 테스트 경로 필수, 독립 기능 테스트 불필요
+- `IF-acceptance`: IF-인수 테스트 경로만 필수, 독립 테스트 불필요
+- `uf.md` 외 `uf_split/` 동반 파일 생성 추가
+
+**중요:** UF 설계 완료 후 `uf-chain-validator`를 1차 실행해 Ownership 선언 완결성을 확인한 뒤 구현으로 진행.
 
 ---
 
@@ -176,15 +190,27 @@ if_list.md + if_decomposition.md + src/uf/
 ### ⑥ uf-chain-validator — UF 체인 무결성 검증
 
 **언제:** 기능 브랜치 병합 전, UF 모듈 추가/리팩터 후.
+         `uf-designer` 완료 직후 설계 검토용으로도 조기 실행 권장.
 
 **트리거 예시:**
 - "UF 검증해줘", "체인 검사해줘", "validation 돌려줘"
 
 **입력 → 출력:**
 ```
-uf.md + src/ + tests/ + evidence_pack/
-  → validation_report.md (PASS/FAIL + 누락 링크 목록)
+uf.md + if_list.md + src/ + tests/ + evidence_pack/
+  → validation_report.md (3개 게이트별 PASS/FAIL/WARN + 제안 수정)
 ```
+
+**v2 변경사항 — 3-Gate 구조:**
+
+| 게이트 | 검증 내용 |
+|--------|-----------|
+| **Gate 1** 구현/런타임 | I/O 계약 존재, 체인 연속성, 런타임 스모크 테스트 |
+| **Gate 2** 문서-테스트 정합 | Ownership 선언 완결성, 소유권별 테스트 경로 존재 여부 |
+| **Gate 3** 증거 팩 완결성 | 증거 항목 누락 여부, `uf_split/` 동기화 상태 |
+
+**중요:** `guard-rail+chain` 또는 `IF-acceptance` UF에 독립 기능 테스트가 없어도 자동 FAIL 아님.
+소유권이 명시적으로 선언되고 해당 소유권의 테스트 경로가 존재하면 PASS.
 
 ---
 

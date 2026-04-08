@@ -72,14 +72,26 @@ For each IF in `if_list.md`, decompose it into a tree of subfunctions (UF candid
 
 **Decomposition rules:**
 - Each subfunction must satisfy the Single Responsibility Principle: one clear job
-- Each subfunction must be independently testable
 - The output of one subfunction must be the input of the next (chain continuity)
 - Depth: prefer 2–3 levels; stop decomposing when a node is "implement in 1 function"
 - Name subfunctions with verb-noun format: `parse_frame`, `normalize_audio`, `compute_score`
+- **Every leaf node must declare an explicit `Verification Owner`** from one of the three categories below.
+
+**Verification Owner categories (assign exactly one per leaf node):**
+
+| Category | When to assign | What it means |
+|---|---|---|
+| `UF-local` | The UF's correctness is fully decidable in isolation | Owns a standalone functional test |
+| `guard-rail + IF-chain` | The UF is a composition/assembly/merge node | Has guard-rail tests locally; behavioral validation lives in the parent IF-chain test |
+| `IF-acceptance` | Correctness only emerges across the full IF span (e.g., end-to-end latency, determinism, schema stability) | No UF-local functional test required; acceptance is validated at IF level |
+
+> **Do NOT default to `UF-local` for every leaf.** Composition-heavy nodes, packaging steps,
+> and nodes whose output is only meaningful inside the chain belong to `guard-rail + IF-chain`
+> or `IF-acceptance`. Forcing `UF-local` onto these creates false precision and document drift.
 
 **For each IF, write:**
 1. A dependency tree showing the subfunction hierarchy
-2. For each leaf node (UF candidate): a mini I/O summary (input → output)
+2. For each leaf node (UF candidate): a mini I/O summary (input → output) **and the assigned Verification Owner**
 3. Execution order annotation: sequential (→) or parallel (‖)
 
 Use `assets/if_decomposition_template.md` as the structure.
@@ -133,3 +145,5 @@ Next step → run /uf-designer with if_decomposition.md as input (Stage 7).
 - [ ] Leaf nodes in the decomposition tree are concrete enough to implement as single functions
 - [ ] I/O chain is continuous: output of each node matches input of the next
 - [ ] Failure modes are listed for each IF
+- [ ] Every leaf node has an explicit `Verification Owner` declared (`UF-local` / `guard-rail+chain` / `IF-acceptance`)
+- [ ] No leaf node is assigned `UF-local` solely by default — composition/assembly nodes use `guard-rail+chain` or `IF-acceptance`

@@ -49,8 +49,8 @@ Build a list: `UF-ID | Parent IF | Name | Input | Output`.
 Confirm with yourself that each candidate satisfies SRP before writing its block:
 - Can it be described in a single sentence starting with a verb?
 - Does it have exactly one input data type and one output data type?
-- Can it be tested in isolation with a mock of its inputs?
 
+Also carry forward the `Verification Owner` declared in `if_decomposition.md` for each leaf node.
 If a candidate is too large, split it and note the new IDs.
 
 ---
@@ -79,9 +79,31 @@ Use `assets/uf_block_template.md`.
 - Resource exhaustion (OOM, disk full)
 - For each: state the expected behavior (raise, return default, log-and-skip)
 
-**Verification Plan** — name concrete test functions:
-- Unit test path: `tests/unit/test_<uf_name>.py::test_<scenario>`
-- Coverage target: always `>= 90%` unless justified
+**Verification Plan** — classify by ownership, then name concrete artifacts:
+
+Every UF Block must declare three sub-fields:
+
+```
+Verification Plan:
+  Ownership: <UF-local | guard-rail+chain | IF-acceptance>
+  Unit Verification:
+    - <test path or "N/A — ownership: guard-rail+chain|IF-acceptance">
+    - Coverage target: >= 90% (UF-local only; omit or mark N/A for others)
+  Chain Verification:
+    - <IF-level test path that validates this UF's behavior, or "N/A — ownership: UF-local">
+```
+
+**Ownership rules:**
+
+| Ownership | Unit Verification | Chain Verification |
+|---|---|---|
+| `UF-local` | Required — name standalone test path(s), coverage >= 90% | N/A |
+| `guard-rail+chain` | Guard-rail tests only (input/output type guards, sentinel checks) | Required — name IF-chain test path |
+| `IF-acceptance` | N/A | Required — name IF-acceptance test path |
+
+> Do not default to `UF-local` for assembly, packaging, or merge nodes. Their behavioral
+> correctness is only meaningful inside the chain, so forcing standalone tests creates
+> false precision and documentation drift.
 
 **UF-IDs** — use the parent IF ID as prefix: `UF-01-01`, `UF-01-02`, `UF-02-01`, ...
 
@@ -108,15 +130,43 @@ Fix all failures before handing off.
 
 ---
 
+### Phase E — Generate per-IF Companion Documents (uf_split/)
+
+After `uf.md` is complete and validated, split it into per-IF companion files.
+Create one file per IF under `uf_split/`:
+
+```
+uf_split/
+  uf_if01.md   ← all UF blocks whose parent IF is IF-01
+  uf_if02.md   ← all UF blocks whose parent IF is IF-02
+  uf_if03.md   ← all UF blocks whose parent IF is IF-03
+  ...
+```
+
+Each companion file contains:
+- A header: `# UF Blocks — IF-NN (IF name)` 
+- The full UF Blocks for that IF, copied verbatim from `uf.md`
+- A summary table at the top: `UF-ID | Name | Verification Owner`
+
+> `uf.md` remains the single canonical source. The `uf_split/` files are read-only
+> derived views — they are regenerated whenever `uf.md` changes.
+
+**Output:** `uf_split/uf_if01.md`, `uf_split/uf_if02.md`, … (one per IF)
+
+---
+
 ## Downstream Handoff
 
 ```
 ✅ Stage 7 complete.
-  - uf.md (UF-XX-YY blocks, ready for implementation)
+  - uf.md                  (canonical UF Blocks — all IFs)
+  - uf_split/uf_if01.md    (per-IF companion view, IF-01)
+  - uf_split/uf_if02.md    (per-IF companion view, IF-02)
+  - ...                    (one file per IF)
 
 Two options for next steps:
   A. Validate design first  → run /uf-chain-validator with uf.md + if_list.md
-  B. Start implementing     → run /uf-implementor with uf.md
+  B. Start implementing     → run /uf-implementor with uf.md (or per-IF uf_split/ file)
 ```
 
 ---
@@ -127,6 +177,11 @@ Two options for next steps:
 - [ ] I/O Contract specifies type + unit/shape + range (no vague "tensor" or "data")
 - [ ] Algorithm Summary is 1–3 lines and names a concrete algorithm
 - [ ] At least 3 Edge Cases per UF (empty, out-of-range, shape mismatch)
-- [ ] Verification Plan names test function paths
+- [ ] Every UF Verification Plan declares `Ownership`, `Unit Verification`, and `Chain Verification`
+- [ ] `UF-local` UFs name a concrete standalone test path and coverage target
+- [ ] `guard-rail+chain` UFs name guard-rail tests AND the IF-chain test path
+- [ ] `IF-acceptance` UFs name the IF-acceptance test path (no standalone test required)
+- [ ] No assembly/packaging/merge node is assigned `UF-local` without explicit justification
 - [ ] I/O chain is continuous across all UFs within each IF
 - [ ] UF-IDs follow `UF-[parent_IF_num]-[seq]` format
+- [ ] `uf_split/` companion files exist for every IF and match `uf.md`
