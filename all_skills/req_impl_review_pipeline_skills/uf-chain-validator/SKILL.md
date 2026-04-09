@@ -78,6 +78,12 @@ that the referenced test artifacts exist (or are explicitly deferred).
 **WARN conditions:**
 - `UF-local` coverage target below 90% without justification
 - Guard-rail tests for `guard-rail+chain` UFs are absent (type/sentinel checks missing)
+- **Beyonce Rule 위반:** 기존 UF를 수정했는데 해당 UF의 테스트 커버리지가 이전보다 줄어든 경우. 동작을 바꾸면 테스트도 함께 갱신해야 한다.
+
+**테스트 품질 체크 (WARN — 발견 시 보고):**
+- 테스트명이 `test_case1`, `test_func` 등 동작을 설명하지 않는 경우 → `test_uf_XX_<동작>_<조건>` 형식 권장
+- 테스트가 UF 내부 구현 방식(특정 함수 호출 여부)을 검증하고 있는 경우 → 입력/출력(상태)만 검증하도록 수정 권장
+- 단일 테스트 함수에 여러 개념이 혼합된 경우 → 개념당 1개 테스트로 분리 권장
 
 > **Do NOT fail** a `guard-rail+chain` or `IF-acceptance` UF solely because it lacks
 > a standalone functional test. That is the intended design.

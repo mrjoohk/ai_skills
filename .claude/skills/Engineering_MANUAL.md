@@ -10,11 +10,10 @@
 | 스킬 | Stage | 역할 |
 |------|-------|------|
 | `core-engineering` | 전체 | 파이프라인 전체 규칙 정의 (마스터 레퍼런스) |
-| `context-engineering` | 전체 | 에이전트 컨텍스트 설계 · GLOBAL_RULES · 세션 관리 |
 | `req-elicitor` | 1–4 | 문제 정의 → 요구사항 도출 |
 | `if-designer` | 5–6 | IF 경계 설계 → UF 후보 분해 |
 | `uf-designer` | 7 | UF 블록 명세 정의 |
-| `uf-implementor` | 구현 | UF 블록 → 프로덕션 코드 + 유닛 테스트 (TDD) |
+| `uf-implementor` | 구현 | UF 블록 → 프로덕션 코드 + 유닛 테스트 |
 | `if-integrator` | 통합 | UF → IF 수준 통합 모듈 조립 |
 | `uf-chain-validator` | 검증 | UF 체인 무결성 + I/O 계약 검증 |
 | `uf-if-debug-mapper` | 디버깅 | UF/IF 이슈 → 코드 위치 매핑 + 디버깅 플랜 |
@@ -110,11 +109,6 @@ requirements.md
 모든 리프 노드가 독립 기능 테스트 대상이어야 한다는 이전 가정은 폐기. 컴포지션/어셈블리 노드는
 `guard-rail+chain` 또는 `IF-acceptance`로 분류.
 
-**v2.1 변경사항 — 계약 설계 원칙 추가:**
-- **Hyrum's Law 적용:** Output Contract에 노출하는 모든 필드는 다운스트림이 암묵적으로 의존할 수 있음을 인식하고 최소 노출 원칙으로 설계
-- **추가 우선 원칙:** 기존 IF 계약 수정 시 기존 필드 삭제/변경 금지 — 선택적 필드 추가로만 확장
-- **에러 시맨틱 통일:** 모든 IF의 Failure Modes는 동일한 에러 표현 방식을 따름
-
 ---
 
 ### ③ uf-designer — UF 블록 명세 정의
@@ -160,7 +154,7 @@ if_decomposition.md
 
 ---
 
-### ④ uf-implementor — UF 코드 구현 (TDD)
+### ④ uf-implementor — UF 코드 구현
 
 **언제:** `uf.md` + UF→IF 커버리지 검토 완료 후.
 
@@ -170,17 +164,10 @@ if_decomposition.md
 **입력 → 출력:**
 ```
 uf.md (+ uf_if_coverage_review.md 권장)
-  → tests/unit/test_uf_*.py (테스트 먼저 — RED 단계)
-  → src/uf/*.py (프로덕션 코드 + 독스트링 — GREEN 단계)
+  → src/uf/*.py (프로덕션 코드 + 독스트링)
+  → tests/unit/test_uf_*.py (유닛 테스트)
   → reports/impl/uf_impl_report_*.md
 ```
-
-**v2 변경사항 — TDD 사이클 적용:**
-- **RED 먼저:** acceptance criteria(Given/When/Then) → pytest 함수로 변환 후 FAIL 확인
-- **GREEN:** 테스트 통과하는 최소 구현 작성
-- **DAMP 원칙:** 테스트는 DRY보다 DAMP — 각 테스트가 독립적으로 스펙처럼 읽혀야 함
-- **Mock 최소화:** 시스템 경계(I/O, 네트워크)에서만 Mock 사용
-- **Beyonce Rule:** 기존 UF 수정 시 테스트 커버리지 감소 금지
 
 ---
 
@@ -292,11 +279,6 @@ evaluation_plan.md + 실험 결과 데이터
 
 **특징:** 기존 `project_summary.md`가 있으면 덮어쓰지 않고 내용을 병합·갱신한다.
 
-**v2.1 변경사항 — Key Decisions 섹션 추가:**
-- **What이 아닌 Why 기록:** 결정 사항에는 이유 + 기각한 대안을 반드시 포함
-- **Key Decisions 표 필수:** 중요 설계 결정은 `결정 | 선택 | 기각 대안 | 이유` 형식으로 기록
-- 기록 기준: 두 가지 접근법 비교·선택, IF 경계 변경, 알고리즘 교체, 예상치 못한 제약으로 설계 변경
-
 ---
 
 ## 디버깅 발생 시 — uf-if-debug-mapper
@@ -313,71 +295,15 @@ UF/IF 목록 + 에러 로그 + 모듈 레이아웃
   → 디버깅 가이드 (코드 위치 맵 + 수정 제안 + 검증 방법)
 ```
 
-**v2.1 변경사항 — 구조적 트리아지 추가:**
-- **Stop-the-Line Rule:** 오류 발생 시 즉시 중단 → 증거 보존 → 5단계 트리아지
-- **5단계 체크리스트:** Reproduce → Localize → Reduce → Fix Root Cause → Guard
-- **근본 원인 수정 원칙:** 증상만 수정 금지, "왜 발생했는가?"를 원인에 도달할 때까지 반복
-- **Guard 단계 의무화:** 버그 수정 후 재발 방지 테스트 추가 필수
-
----
-
----
-
-## 컨텍스트 관리 — context-engineering
-
-파이프라인의 모든 단계에서 에이전트 출력 품질을 좌우하는 **메타 스킬**.
-구현 스킬들이 "무엇을 만드는지"를 정의한다면, context-engineering은 "에이전트가 올바른 정보를 갖고 만드는지"를 보장한다.
-
-**트리거 예시:**
-- "새 프로젝트 시작할게", "GLOBAL_RULES 만들어줘", "rules file 설정해줘"
-- "에이전트가 엉뚱한 걸 만들어", "출력 품질이 낮아졌어"
-- "Cursor 규칙 파일 만들어줘", ".cursorrules 업데이트"
-- "다음 단계로 넘어가기 전에 컨텍스트 정리해줘"
-
-**호출 시점 (명확한 기준):**
-
-| 상황 | 호출 이유 |
-|------|----------|
-| **프로젝트 최초 시작** | GLOBAL_RULES.md 없으면 에이전트가 컨벤션을 모름 |
-| **req-elicitor 완료 직후** | requirements.md 완성 → GLOBAL_RULES에 핵심 제약 반영 |
-| **uf-designer 완료 → uf-implementor 진입 전** | 구현 단계 컨텍스트 설정 (uf.md 구조 → .cursorrules 업데이트) |
-| **에이전트 출력 품질 저하** | 존재하지 않는 API 참조, 컨벤션 무시, 이전 아티팩트 기준 작업 |
-| **긴 대화(50+ 턴) 후 세션 교체 시** | 세션 요약 블록 생성 → 새 세션 시작 |
-| **파이프라인 단계 전환마다** | 불필요한 컨텍스트 제거, 관련 아티팩트만 재로드 |
-
-**입력 → 출력:**
-```
-현재 파이프라인 단계 + 기존 아티팩트 상태
-  → GLOBAL_RULES.md (신규 생성 또는 업데이트)
-  → .cursorrules (Cursor 구현 단계 시)
-  → 세션 요약 블록 (세션 교체 시)
-```
-
-**파이프라인 내 위치:**
-```
-프로젝트 시작 → [context-engineering: GLOBAL_RULES 설정]
-     ↓
-req-elicitor 완료 → [context-engineering: 핵심 제약 반영]
-     ↓
-uf-designer 완료 → [context-engineering: .cursorrules 업데이트]
-     ↓
-(구현 세션 품질 저하 시마다 호출)
-     ↓
-프로젝트 완료 → project-summarizer
-```
-
 ---
 
 ## 빠른 시작 — 새 프로젝트 체크리스트
 
 ```
-□ 0. context-engineering 실행 → GLOBAL_RULES.md 생성  ← 신규 추가
 □ 1. 문제를 자연어로 설명한다
 □ 2. req-elicitor 실행 → 명확화 질문 답변
-□ 2a. context-engineering 실행 → GLOBAL_RULES 핵심 제약 반영  ← 신규 추가
 □ 3. if-designer 실행
 □ 4. uf-designer 실행 → uf-chain-validator로 커버리지 확인
-□ 4a. context-engineering 실행 → .cursorrules 업데이트  ← 신규 추가
 □ 5. (도메인 해당 시) specific_skills 감사 스킬 투입
 □ 6. uf-implementor 실행
 □ 7. if-integrator 실행

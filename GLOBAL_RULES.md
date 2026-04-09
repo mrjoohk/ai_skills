@@ -28,6 +28,10 @@ Example: `260318_1430_uf_status_analysis.md`
 > All files created in the working folder must be logged in `0.FilesUpdate.xlsx`.
 > **If `0.FilesUpdate.xlsx` does not exist, create it first, then record the entry.**
 
+> **[Encoding Rule]** Always write xlsx files using the `openpyxl` library directly.
+> Never generate xlsx via intermediate paths (CSV conversion, subprocess, print redirection, etc.).
+> `openpyxl` natively handles UTF-8 Unicode, preventing silent `?` substitution of non-ASCII characters.
+
 | Column | Content |
 |--------|---------|
 | 일시 | YYYY-MM-DD HH:MM |
@@ -59,6 +63,8 @@ Example: `260318_1430_uf_status_analysis.md`
 ### Rule 8 — Prompt & Response Log
 > Every user request prompt and the agent's corresponding response/result must be recorded in order in `1.PromptsUpdate.xlsx`.
 > **If `1.PromptsUpdate.xlsx` does not exist, create it first.**
+
+> **[Encoding Rule]** Same as Rule 4: always use `openpyxl` directly to prevent `?` corruption of non-ASCII text.
 
 | Column | Content |
 |--------|---------|

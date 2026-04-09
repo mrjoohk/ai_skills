@@ -55,12 +55,20 @@ boundary modules that fulfill one or more REQs.
 - Separate IFs when the data type, protocol, or processing domain changes significantly
 - A typical system has 3–8 IFs; more than 10 suggests too fine-grained decomposition
 
+**계약 설계 원칙 — IF Block 작성 전 숙지:**
+
+> **Hyrum's Law:** 다운스트림 UF가 IF의 출력 동작에 의존하기 시작하면, 문서화되지 않은 동작까지도 암묵적 계약이 된다. Output Contract에 노출하는 모든 필드·타입·범위는 의도적으로 선택하라.
+
+- **노출 최소화:** Output Contract에는 다운스트림이 실제로 필요한 필드만 포함한다. 구현 내부 상세(중간 버퍼, 내부 상태)는 노출하지 않는다.
+- **추가 우선, 변경 금지:** 기존 IF Contract를 수정할 때는 기존 필드를 변경하거나 삭제하지 말고 선택적 필드를 추가하는 방식으로 확장한다.
+- **에러 시맨틱 일관성:** 모든 IF의 Failure Modes는 동일한 에러 표현 방식(예외 타입 또는 반환 코드)을 따른다. IF마다 다른 패턴을 섞지 않는다.
+
 **For each IF, write an IF Block** (use `assets/if_list_template.md`):
 - `IF-ID`: sequential, IF-01, IF-02, …
 - `Producer` and `Consumer`: the component or actor on each side
 - `Input Contract` and `Output Contract`: type + unit/shape + range (same rigor as REQ I/O)
 - `Linked REQs`: which REQ IDs this IF satisfies (at least one per IF)
-- `Failure Modes`: what breaks if this interface fails
+- `Failure Modes`: what breaks if this interface fails (에러 표현 방식 통일)
 
 **Output:** `if_list.md`
 
@@ -144,6 +152,8 @@ Next step → run /uf-designer with if_decomposition.md as input (Stage 7).
 - [ ] Every REQ is covered by at least one IF
 - [ ] Leaf nodes in the decomposition tree are concrete enough to implement as single functions
 - [ ] I/O chain is continuous: output of each node matches input of the next
-- [ ] Failure modes are listed for each IF
+- [ ] Failure modes are listed for each IF (에러 표현 방식 IF 간 일관)
 - [ ] Every leaf node has an explicit `Verification Owner` declared (`UF-local` / `guard-rail+chain` / `IF-acceptance`)
 - [ ] No leaf node is assigned `UF-local` solely by default — composition/assembly nodes use `guard-rail+chain` or `IF-acceptance`
+- [ ] Output Contract 필드가 최소 노출 원칙을 따름 (구현 내부 상세 미포함)
+- [ ] 기존 IF 수정 시 기존 필드 변경/삭제 없이 선택적 추가 방식으로만 확장

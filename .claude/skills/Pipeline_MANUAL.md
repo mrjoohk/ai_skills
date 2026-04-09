@@ -9,7 +9,6 @@
 
 | 스킬 | 단계 | 역할 |
 |------|------|------|
-| `context-engineering` | 전체 | 에이전트 컨텍스트 설계 · GLOBAL_RULES · .cursorrules · 세션 관리 |
 | `req-elicitor` | 1 | 자연어 문제 → 요구사항 아티팩트 |
 | `if-designer` | 1 | 요구사항 → IF 경계·분해 설계 |
 | `uf-designer` | 2 | IF 분해 → UF 블록 명세 |
@@ -91,11 +90,6 @@ if-designer → if_list.md + if_decomposition.md
 **v2 변경사항:** `if_decomposition.md`의 각 리프 노드에 `Verification Owner` 필드 추가
 (`UF-local` / `guard-rail+chain` / `IF-acceptance`). 모든 리프가 독립 테스트 가능해야 한다는
 이전 가정 폐기.
-
-**v2.1 변경사항 — 계약 설계 원칙 추가 (if-designer):**
-- **Hyrum's Law 적용:** IF Output Contract 노출 필드는 다운스트림이 암묵적으로 의존할 수 있음 인식 → 최소 노출 설계
-- **추가 우선 원칙:** 기존 IF 계약 수정 시 기존 필드 삭제/변경 금지, 선택적 추가만 허용
-- **에러 시맨틱 통일:** 모든 IF Failure Modes는 동일한 에러 표현 방식 사용
 
 ---
 
@@ -235,10 +229,6 @@ uf.md + if_list.md + src/ + tests/ + evidence_pack/
 
 **중요:** `guard-rail+chain` / `IF-acceptance` UF에 독립 기능 테스트가 없어도 자동 FAIL 아님.
 
-**v2.1 변경사항 — 테스트 품질 체크 추가:**
-- **Beyonce Rule:** 기존 UF 수정 시 테스트 커버리지 감소 → WARN
-- **테스트 품질 WARN:** 비서술적 테스트명, 구현 내부 동작 검증, 단일 테스트에 여러 개념 혼합
-
 ---
 
 ### Step 8 — 완료 정리 (project-summarizer)
@@ -254,11 +244,6 @@ uf.md + if_list.md + src/ + tests/ + evidence_pack/
 대화 히스토리 + 설계 산출물 + 구현 결과
   → project_summary.md (누적 갱신)
 ```
-
-**v2.1 변경사항 — Key Decisions 섹션 추가:**
-- **What이 아닌 Why 기록:** 결정 사항에 이유 + 기각 대안 필수 포함
-- **Key Decisions 표 필수:** `결정 | 선택 | 기각 대안 | 이유` 형식
-- 기록 기준: 두 가지 이상 접근법 비교, IF 경계 변경, 알고리즘 교체, 예상치 못한 제약으로 설계 변경
 
 ---
 
@@ -276,76 +261,18 @@ UF/IF 목록 + 에러 로그 + 모듈 레이아웃
   → 디버깅 가이드 (코드 위치 맵 + 최소 수정 제안 + 검증 방법)
 ```
 
-**v2.1 변경사항 — 구조적 트리아지 추가:**
-- **Stop-the-Line Rule:** 오류 발생 즉시 중단 → 증거 보존 → 5단계 트리아지 진행
-- **5단계:** Reproduce → Localize (UF/IF 레이어 특정) → Reduce → Fix Root Cause → Guard
-- **근본 원인 수정:** 증상 수정 금지, UF→UF 경계의 I/O 불일치까지 추적
-- **Guard 단계:** 재발 방지 테스트 추가 후 uf-chain-validator 재실행
-
----
-
----
-
-## 컨텍스트 관리 — context-engineering
-
-Claude↔Cursor 협업 파이프라인에서 **Cursor가 올바른 컨텍스트로 구현하도록** 보장하는 메타 스킬.
-repo-doc-writer가 "설계 문서를 만든다"면, context-engineering은 "에이전트가 그 문서를 올바르게 사용하도록 환경을 설정한다".
-
-**트리거 예시:**
-- "새 프로젝트 시작할게", "GLOBAL_RULES 만들어줘", ".cursorrules 설정해줘"
-- "Cursor가 엉뚱한 걸 만들어", "구현 품질이 낮아졌어", "Cursor가 컨벤션을 안 따라"
-- "다음 구현 세션 시작 전에 컨텍스트 정리해줘"
-- "세션 요약해줘", "새 세션으로 넘어갈게"
-
-**호출 시점 (명확한 기준):**
-
-| 상황 | 호출 이유 |
-|------|----------|
-| **프로젝트 최초 시작** | GLOBAL_RULES.md + .cursorrules 없으면 Cursor가 컨벤션을 모름 |
-| **uf-designer 완료 → repo-doc-writer 진입 전** | uf.md 구조 → .cursorrules + /docs/ai 업데이트 |
-| **Cursor 구현 품질 저하** | 존재하지 않는 함수 참조, 컨벤션 무시, 설계 외 코드 생성 |
-| **code-reviewer CRITICAL 다수 발생** | Cursor가 계약을 이해하지 못했을 가능성 → 컨텍스트 보강 |
-| **긴 Claude 대화 후 세션 교체 시** | 세션 요약 블록 생성 → 새 세션 시작 |
-| **다른 IF 모듈로 구현 전환 시** | 이전 모듈 컨텍스트 제거, 새 모듈 관련 파일만 재로드 |
-
-**입력 → 출력:**
-```
-현재 파이프라인 단계 + 기존 아티팩트 상태
-  → GLOBAL_RULES.md (신규 생성 또는 업데이트)
-  → .cursorrules (Cursor 구현 규칙 최신화)
-  → 세션 요약 블록 (세션 교체 시 컨텍스트 전달용)
-```
-
-**파이프라인 내 위치:**
-```
-프로젝트 시작 → [context-engineering: GLOBAL_RULES + .cursorrules 초기 설정]
-     ↓
-req-elicitor + if-designer + uf-designer 완료
-     ↓
-[context-engineering: uf.md 기반 .cursorrules 업데이트]
-     ↓
-repo-doc-writer → cursor-task-formatter → Cursor 구현
-     ↓
-(Cursor 출력 품질 저하 시 → context-engineering 재실행)
-     ↓
-code-reviewer → cursor-task-formatter (fix) → Cursor 수정
-```
-
 ---
 
 ## 빠른 시작 체크리스트
 
 ```
-□ 0. context-engineering 실행 → GLOBAL_RULES.md + .cursorrules 초기 설정  ← 신규
 □ 1. 기능을 자연어로 설명한다
 □ 2. req-elicitor 실행 → 명확화 질문 답변
 □ 3. if-designer 실행
 □ 4. uf-designer 실행
-□ 4a. context-engineering 실행 → .cursorrules uf.md 구조 반영  ← 신규
 □ 5. (도메인 해당 시) specific_skills 감사 스킬 투입
 □ 6. repo-doc-writer 실행
 □ 7. cursor-task-formatter (Mode A) → Cursor 구현
-   └─ (Cursor 품질 저하 시 → context-engineering 재실행 후 계속)  ← 신규
 □ 8. code-reviewer 실행
 □ 9. cursor-task-formatter (Mode B) → Cursor 수정 (CRITICAL 해소까지 반복)
 □ 10. uf-chain-validator 최종 검증
