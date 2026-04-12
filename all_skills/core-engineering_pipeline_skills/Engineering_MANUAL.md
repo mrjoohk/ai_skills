@@ -10,7 +10,7 @@
 | 스킬 | Stage | 역할 |
 |------|-------|------|
 | `core-engineering` | 전체 | 파이프라인 전체 규칙 정의 (마스터 레퍼런스) |
-| `context-engineering` | 전체 | 에이전트 컨텍스트 설계 · GLOBAL_RULES · 세션 관리 |
+| `context-engineering` | 프로젝트 시작 | 에이전트 설정 파일 생성 (CLAUDE.md / AGENTS.md / GEMINI.md) |
 | `req-elicitor` | 1–4 | 문제 정의 → 요구사항 도출 |
 | `if-designer` | 5–6 | IF 경계 설계 → UF 후보 분해 |
 | `uf-designer` | 7 | UF 블록 명세 정의 |
@@ -325,45 +325,43 @@ UF/IF 목록 + 에러 로그 + 모듈 레이아웃
 
 ## 컨텍스트 관리 — context-engineering
 
-파이프라인의 모든 단계에서 에이전트 출력 품질을 좌우하는 **메타 스킬**.
-구현 스킬들이 "무엇을 만드는지"를 정의한다면, context-engineering은 "에이전트가 올바른 정보를 갖고 만드는지"를 보장한다.
+새 프로젝트 또는 새 세션 시작 시 **에이전트 설정 파일 3종**을 생성하는 스킬.
+Claude / Cursor / Codex / Antigravity 등 어떤 에이전트를 사용하더라도 동일하게 작동한다.
 
 **트리거 예시:**
-- "새 프로젝트 시작할게", "GLOBAL_RULES 만들어줘", "rules file 설정해줘"
-- "에이전트가 엉뚱한 걸 만들어", "출력 품질이 낮아졌어"
-- "Cursor 규칙 파일 만들어줘", ".cursorrules 업데이트"
-- "다음 단계로 넘어가기 전에 컨텍스트 정리해줘"
+- "새 프로젝트 시작할게", "세션 시작", "에이전트 설정해줘"
+- "CLAUDE.md 만들어줘", "AGENTS.md 만들어줘", "GEMINI.md 만들어줘"
+- "venv 설정해줘", "context setup"
 
 **호출 시점 (명확한 기준):**
 
 | 상황 | 호출 이유 |
 |------|----------|
-| **프로젝트 최초 시작** | GLOBAL_RULES.md 없으면 에이전트가 컨벤션을 모름 |
-| **req-elicitor 완료 직후** | requirements.md 완성 → GLOBAL_RULES에 핵심 제약 반영 |
-| **uf-designer 완료 → uf-implementor 진입 전** | 구현 단계 컨텍스트 설정 (uf.md 구조 → .cursorrules 업데이트) |
-| **에이전트 출력 품질 저하** | 존재하지 않는 API 참조, 컨벤션 무시, 이전 아티팩트 기준 작업 |
-| **긴 대화(50+ 턴) 후 세션 교체 시** | 세션 요약 블록 생성 → 새 세션 시작 |
-| **파이프라인 단계 전환마다** | 불필요한 컨텍스트 제거, 관련 아티팩트만 재로드 |
+| **프로젝트 최초 시작 (저장소 clone 직후)** | 에이전트 설정 파일이 없으면 에이전트가 규칙과 경로를 모름 |
+| **기존 프로젝트에 새 에이전트 추가 시** | 새 에이전트용 설정 파일 생성 필요 |
+| **설정 파일이 GLOBAL_RULES.md 최신 내용을 반영 못할 때** | 재생성으로 동기화 |
+
+**스킬 동작:**
+1. 사용자에게 venv Python 실행파일 경로 요청
+2. 사용자에게 API 키 요청 (선택)
+3. 수집한 정보 + GLOBAL_RULES.md 준수 지시 + 핵심 아티팩트 경로로 3개 파일 생성
 
 **입력 → 출력:**
 ```
-현재 파이프라인 단계 + 기존 아티팩트 상태
-  → GLOBAL_RULES.md (신규 생성 또는 업데이트)
-  → .cursorrules (Cursor 구현 단계 시)
-  → 세션 요약 블록 (세션 교체 시)
+venv Python 경로 + API 키 (선택)
+  → ./CLAUDE.md   (Claude용)
+  → ./AGENTS.md   (Codex / Antigravity 등)
+  → ./GEMINI.md   (Gemini용)
 ```
+
+**주의:** context-engineering은 GLOBAL_RULES.md를 생성하지 않는다.
+GLOBAL_RULES.md는 req-elicitor 또는 별도 수동 작업으로 생성한다.
 
 **파이프라인 내 위치:**
 ```
-프로젝트 시작 → [context-engineering: GLOBAL_RULES 설정]
+프로젝트 시작 → [context-engineering: 에이전트 설정 파일 생성]
      ↓
-req-elicitor 완료 → [context-engineering: 핵심 제약 반영]
-     ↓
-uf-designer 완료 → [context-engineering: .cursorrules 업데이트]
-     ↓
-(구현 세션 품질 저하 시마다 호출)
-     ↓
-프로젝트 완료 → project-summarizer
+req-elicitor → if-designer → uf-designer → uf-implementor → ...
 ```
 
 ---
@@ -371,13 +369,12 @@ uf-designer 완료 → [context-engineering: .cursorrules 업데이트]
 ## 빠른 시작 — 새 프로젝트 체크리스트
 
 ```
-□ 0. context-engineering 실행 → GLOBAL_RULES.md 생성  ← 신규 추가
+□ 0. context-engineering 실행 → CLAUDE.md / AGENTS.md / GEMINI.md 생성
+□    (GLOBAL_RULES.md 미존재 시 수동 작성 또는 req-elicitor 이후 작성)
 □ 1. 문제를 자연어로 설명한다
 □ 2. req-elicitor 실행 → 명확화 질문 답변
-□ 2a. context-engineering 실행 → GLOBAL_RULES 핵심 제약 반영  ← 신규 추가
 □ 3. if-designer 실행
 □ 4. uf-designer 실행 → uf-chain-validator로 커버리지 확인
-□ 4a. context-engineering 실행 → .cursorrules 업데이트  ← 신규 추가
 □ 5. (도메인 해당 시) specific_skills 감사 스킬 투입
 □ 6. uf-implementor 실행
 □ 7. if-integrator 실행

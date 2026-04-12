@@ -9,7 +9,7 @@
 
 | 스킬 | 단계 | 역할 |
 |------|------|------|
-| `context-engineering` | 전체 | 에이전트 컨텍스트 설계 · GLOBAL_RULES · .cursorrules · 세션 관리 |
+| `context-engineering` | 프로젝트 시작 | 에이전트 설정 파일 생성 (CLAUDE.md / AGENTS.md / GEMINI.md) |
 | `req-elicitor` | 1 | 자연어 문제 → 요구사항 아티팩트 |
 | `if-designer` | 1 | 요구사항 → IF 경계·분해 설계 |
 | `uf-designer` | 2 | IF 분해 → UF 블록 명세 |
@@ -288,47 +288,45 @@ UF/IF 목록 + 에러 로그 + 모듈 레이아웃
 
 ## 컨텍스트 관리 — context-engineering
 
-Claude↔Cursor 협업 파이프라인에서 **Cursor가 올바른 컨텍스트로 구현하도록** 보장하는 메타 스킬.
-repo-doc-writer가 "설계 문서를 만든다"면, context-engineering은 "에이전트가 그 문서를 올바르게 사용하도록 환경을 설정한다".
+새 프로젝트 또는 새 세션 시작 시 **에이전트 설정 파일 3종**을 생성하는 스킬.
+Claude / Cursor / Codex / Antigravity 등 어떤 에이전트를 사용하더라도 동일하게 작동한다.
 
 **트리거 예시:**
-- "새 프로젝트 시작할게", "GLOBAL_RULES 만들어줘", ".cursorrules 설정해줘"
-- "Cursor가 엉뚱한 걸 만들어", "구현 품질이 낮아졌어", "Cursor가 컨벤션을 안 따라"
-- "다음 구현 세션 시작 전에 컨텍스트 정리해줘"
-- "세션 요약해줘", "새 세션으로 넘어갈게"
+- "새 프로젝트 시작할게", "세션 시작", "에이전트 설정해줘"
+- "CLAUDE.md 만들어줘", "AGENTS.md 만들어줘", "GEMINI.md 만들어줘"
+- "venv 설정해줘", "context setup"
 
 **호출 시점 (명확한 기준):**
 
 | 상황 | 호출 이유 |
 |------|----------|
-| **프로젝트 최초 시작** | GLOBAL_RULES.md + .cursorrules 없으면 Cursor가 컨벤션을 모름 |
-| **uf-designer 완료 → repo-doc-writer 진입 전** | uf.md 구조 → .cursorrules + /docs/ai 업데이트 |
-| **Cursor 구현 품질 저하** | 존재하지 않는 함수 참조, 컨벤션 무시, 설계 외 코드 생성 |
-| **code-reviewer CRITICAL 다수 발생** | Cursor가 계약을 이해하지 못했을 가능성 → 컨텍스트 보강 |
-| **긴 Claude 대화 후 세션 교체 시** | 세션 요약 블록 생성 → 새 세션 시작 |
-| **다른 IF 모듈로 구현 전환 시** | 이전 모듈 컨텍스트 제거, 새 모듈 관련 파일만 재로드 |
+| **프로젝트 최초 시작 (저장소 clone 직후)** | 에이전트 설정 파일이 없으면 에이전트가 규칙과 경로를 모름 |
+| **기존 프로젝트에 새 에이전트 추가 시** | 새 에이전트용 설정 파일 생성 필요 |
+| **설정 파일이 GLOBAL_RULES.md 최신 내용을 반영 못할 때** | 재생성으로 동기화 |
+
+**스킬 동작:**
+1. 사용자에게 venv Python 실행파일 경로 요청
+2. 사용자에게 API 키 요청 (선택)
+3. 수집한 정보 + GLOBAL_RULES.md 준수 지시 + 핵심 아티팩트 경로로 3개 파일 생성
 
 **입력 → 출력:**
 ```
-현재 파이프라인 단계 + 기존 아티팩트 상태
-  → GLOBAL_RULES.md (신규 생성 또는 업데이트)
-  → .cursorrules (Cursor 구현 규칙 최신화)
-  → 세션 요약 블록 (세션 교체 시 컨텍스트 전달용)
+venv Python 경로 + API 키 (선택)
+  → ./CLAUDE.md   (Claude용)
+  → ./AGENTS.md   (Codex / Antigravity 등)
+  → ./GEMINI.md   (Gemini용)
 ```
+
+**주의:** context-engineering은 GLOBAL_RULES.md를 생성하지 않는다.
+GLOBAL_RULES.md는 req-elicitor 또는 별도 수동 작업으로 생성한다.
 
 **파이프라인 내 위치:**
 ```
-프로젝트 시작 → [context-engineering: GLOBAL_RULES + .cursorrules 초기 설정]
+프로젝트 시작 → [context-engineering: 에이전트 설정 파일 생성]
      ↓
-req-elicitor + if-designer + uf-designer 완료
+req-elicitor → if-designer → uf-designer → repo-doc-writer
      ↓
-[context-engineering: uf.md 기반 .cursorrules 업데이트]
-     ↓
-repo-doc-writer → cursor-task-formatter → Cursor 구현
-     ↓
-(Cursor 출력 품질 저하 시 → context-engineering 재실행)
-     ↓
-code-reviewer → cursor-task-formatter (fix) → Cursor 수정
+cursor-task-formatter → Cursor 구현 → code-reviewer → ...
 ```
 
 ---
@@ -336,16 +334,15 @@ code-reviewer → cursor-task-formatter (fix) → Cursor 수정
 ## 빠른 시작 체크리스트
 
 ```
-□ 0. context-engineering 실행 → GLOBAL_RULES.md + .cursorrules 초기 설정  ← 신규
+□ 0. context-engineering 실행 → CLAUDE.md / AGENTS.md / GEMINI.md 생성
+□    (GLOBAL_RULES.md 미존재 시 수동 작성 또는 req-elicitor 이후 작성)
 □ 1. 기능을 자연어로 설명한다
 □ 2. req-elicitor 실행 → 명확화 질문 답변
 □ 3. if-designer 실행
 □ 4. uf-designer 실행
-□ 4a. context-engineering 실행 → .cursorrules uf.md 구조 반영  ← 신규
 □ 5. (도메인 해당 시) specific_skills 감사 스킬 투입
 □ 6. repo-doc-writer 실행
 □ 7. cursor-task-formatter (Mode A) → Cursor 구현
-   └─ (Cursor 품질 저하 시 → context-engineering 재실행 후 계속)  ← 신규
 □ 8. code-reviewer 실행
 □ 9. cursor-task-formatter (Mode B) → Cursor 수정 (CRITICAL 해소까지 반복)
 □ 10. uf-chain-validator 최종 검증
