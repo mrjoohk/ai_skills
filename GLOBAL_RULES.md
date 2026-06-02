@@ -84,9 +84,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### Rule 2 — Preserve Analysis as MD Files
 > Save all analysis/investigation content created during tasks as MD files for reuse in future tasks.
+> **Exception**: Review documents that contain diagrams (block diagrams, flowcharts, system structure, etc.) must be saved as `.html` instead, so the diagrams render properly (see Rule 5 and Rule 6).
 
-**Filename convention**: `YYMMDD_HHMM_[description].md`
-Example: `260318_1430_uf_status_analysis.md`
+**Filename convention**: `YYMMDD_HHMM_[description].md` (or `.html` for diagram-bearing review docs)
+Example: `260318_1430_uf_status_analysis.md`, `260318_1430_uf_architecture.html`
 
 ### Rule 3 — State Judgment Rationale
 > Every decision, choice, or recommendation must include the rationale (판단 근거).
@@ -109,17 +110,20 @@ Example: `260318_1430_uf_status_analysis.md`
 
 ### Rule 5 — Output Format Standard
 > Deliverables containing tables or figures must be created as `.docx`.
+> **Review documents containing diagrams must be created as `.html`** (see Rule 6) so that block diagrams, flowcharts, and system structures render correctly. Use a self-contained single HTML file (embed CSS/JS; Mermaid or inline SVG recommended for diagrams).
 
 | Condition | Format |
 |-----------|--------|
-| Contains table or figure | `.docx` |
+| Review/analysis doc containing a diagram | `.html` |
+| Contains table or figure (non-diagram deliverable) | `.docx` |
 | Text-focused analysis/memo | `.md` |
 | Data/numeric-focused | `.xlsx` |
 | Slide presentation | `.pptx` |
 
 ### Rule 6 — Directory for Review Documents
-> All files (docx, ppt, xlsx, md) created during analysis/investigation phases must be saved in the `review_docs` directory.
+> All files (html, docx, ppt, xlsx, md) created during analysis/investigation phases must be saved in the `review_docs` directory.
 > **If `review_docs` does not exist, create it first.**
+> **Diagram representation**: When a review document includes a diagram (block diagram, flowchart, system configuration, R&D concept, etc.), author it as `.html` rather than `.md` so the diagram renders properly. Keep it as a single self-contained HTML file. Use `.md` only for text-focused review docs without diagrams.
 
 **Apply to**: Any file produced during analysis, review, or investigation steps (before user approval).
 
@@ -163,12 +167,12 @@ Receive request
   → [Rule 8] Log user prompt to 1.PromptsUpdate.xlsx
   → Perform analysis/investigation
   → [Rule 3] Summarize with judgment rationale
-  → [Rule 6] Save analysis files to review_docs/
+  → [Rule 6] Save analysis files to review_docs/ (use .html when the doc contains a diagram)
   → [Rule 9] Save design artifacts (requirements, if_list, uf, etc.) to rd/
   → [Rule 1] Present to user for review → Await approval
   → Create output
   → [Rule 7] Save output files to output_docs/
-  → [Rule 2] Save analysis as MD (yymmdd_hhmm_*.md)
+  → [Rule 2] Save analysis as MD (yymmdd_hhmm_*.md), or .html for diagram-bearing review docs
   → [Rule 4] Update 0.FilesUpdate.xlsx
   → [Rule 8] Log agent response to 1.PromptsUpdate.xlsx
 ```
