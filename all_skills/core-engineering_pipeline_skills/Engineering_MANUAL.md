@@ -19,7 +19,8 @@
 | `uf-chain-validator` | 검증 | UF 체인 무결성 + I/O 계약 검증 |
 | `uf-if-debug-mapper` | 디버깅 | UF/IF 이슈 → 코드 위치 매핑 + 디버깅 플랜 |
 | `eval-planner` | 8 | 평가 지표 · 임계값 · 벤치마크 계획 설계 |
-| `eval-runner` | 8 | 평가 계획 실행 + 실험 결과 보고서 생성 |
+| `exp-runner` | 8 | 평가 계획 실행: 시드·환경 고정, 실험 실행, provenance 기록 |
+| `eval-runner` | 8 | 실험 결과 지표 계산 + 비교 보고서 생성 |
 | `ci-evidence-automation` | CI | CI 게이트 · 증거 팩 · 회귀 감지 자동화 |
 | `project-summarizer` | 완료 | 프로젝트 진행 전 과정 요약 문서 생성/갱신 |
 
@@ -55,7 +56,10 @@
    UF 체인 검증 리포트
         ↓
 ⑦ eval-planner ──────────────────────────────────────────
-   evaluation_plan.md
+   rd/evaluation_plan.md
+        ↓
+⑦.5 exp-runner ──────────────────────────────────────────
+   실험 실행: evidence_pack/runs.yaml + env.yaml + results/
         ↓
 ⑧ eval-runner ───────────────────────────────────────────
    실험 결과 비교 보고서
@@ -379,7 +383,7 @@ req-elicitor → if-designer → uf-designer → uf-implementor → ...
 □ 6. uf-implementor 실행
 □ 7. if-integrator 실행
 □ 8. uf-chain-validator 최종 검증
-□ 9. eval-planner → eval-runner 실행
+□ 9. eval-planner → exp-runner(실험 실행·기록) → eval-runner 실행
 □ 10. ci-evidence-automation 구성
 □ 11. project-summarizer로 완료 문서 생성
 ```

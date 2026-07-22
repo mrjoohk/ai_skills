@@ -37,8 +37,9 @@ This skill takes `requirements.md` as input and produces two design artifacts th
 
 ## Input
 
-- **Required:** `requirements.md` (produced by `req-elicitor`)
+- **Required:** `rd/requirements.md` (produced by `req-elicitor`; per GLOBAL_RULES Rule 9 design artifacts live under `rd/` — check `rd/` first, then project root for legacy layouts)
 - If `requirements.md` is missing, stop and ask the user to run `req-elicitor` first.
+- **Gate G1 check:** if any REQ is marked `[GATE-BLOCKED: Q-##]`, stop and ask the user to resolve the linked clarification before designing IFs for that REQ.
 
 ---
 
@@ -117,6 +118,10 @@ After writing both files, verify:
 
 List any gaps explicitly as `[UNCOVERED: REQ-###]` or `[ORPHAN: IF-##]`.
 
+**Gate rule:** any `[UNCOVERED]` or `[ORPHAN]` finding → **BLOCKED**. Revise `if_list.md`
+(or flag the REQ back to req-elicitor) and re-run this check. Do not hand off to
+`uf-designer` while findings remain.
+
 ---
 
 ### Phase D — Validation
@@ -137,10 +142,11 @@ Once validation passes:
 
 ```
 ✅ Stages 5–6 complete. Output files:
-  - if_list.md     (IF-01 ~ IF-N, with I/O contracts and linked REQs)
-  - if_decomposition.md  (UF candidate tree per IF)
+  - rd/if_list.md     (IF-01 ~ IF-N, with I/O contracts and linked REQs)
+  - rd/if_decomposition.md  (UF candidate tree per IF)
 
-Next step → run /uf-designer with if_decomposition.md as input (Stage 7).
+REQ→IF coverage gate: PASS (no UNCOVERED / ORPHAN)
+Next step → run /uf-designer with rd/if_decomposition.md as input (Stage 7).
 ```
 
 ---

@@ -87,7 +87,7 @@ Verification & Evidence Planning
 - Write unit / integration / E2E test plans
 - Define Evidence Pack structure
 - Set regression thresholds
-- **Output:** `verification_plan.md`, proposed `evidence_pack/` structure
+- **Output:** `evaluation_plan.md` (canonical Stage 8 output, produced via `eval-planner`; replaces the legacy name `verification_plan.md`), proposed `evidence_pack/` structure
 
 ---
 
@@ -98,6 +98,7 @@ Verification & Evidence Planning
 3. Token economy: prioritize file paths and symbol references. Do not paste large code blocks.
 4. All claims must have **evidence artifacts** (test results, logs, plots, benchmarks).
 5. Assumptions must be explicitly recorded and validated later.
+6. **All design artifacts (Stage 1–8 outputs) are written under `rd/`** per GLOBAL_RULES Rule 9 (e.g., `rd/requirements.md`, `rd/uf.md`). Skill-generated reports go to `reports/` per Rule 10. Filenames in this document are shorthand for their `rd/` paths.
 
 ---
 
@@ -151,7 +152,7 @@ Use these skills to execute each stage. The pipeline runs sequentially — each 
 | `uf-if-debug-mapper` | **6–7** (debug) | UF/IF artifacts → debug map |
 | `uf-implementor` | After Stage 7.5 | `uf.md` → implemented UF code |
 | `if-integrator` | After UF implementation | UF code → IF-level modules |
-| `eval-planner` | **8** | REQ/UF/IF blocks → `verification_plan.md` |
+| `eval-planner` | **8** | REQ/UF/IF blocks → `rd/evaluation_plan.md` |
 | `eval-runner` | After Stage 8 | evaluation plan + results → metrics report |
 | `ci-evidence-automation` | Stage 8+ | test results → evidence pack |
 | `agent-orchestration` | All stages | applies agent role distribution |

@@ -13,15 +13,22 @@ Automates CI and evidence pack practices:
 - regression detection and reporting
 - artifact storage conventions
 
-## When to Use
-- When introducing new UF modules
-- When CI becomes noisy or lacks diagnostics
-- When you need consistent evidence artifacts for experiments (Exp-01..)
+## When to Use (objective triggers)
+- `eval-runner` has produced `evidence_pack/metrics.yaml` for the first time (wire it into CI now)
+- A new UF/IF module landed and has no coverage gate in CI
+- `evidence_pack/` schema is being extended (new run/metric fields)
+- A regression threshold from `rd/evaluation_plan.md` needs enforcement on every push
 
 ## Inputs
 - CI config (`.github/workflows/*`)
 - test command(s)
-- evidence schema (`evidence_pack/*`)
+- `evidence_pack/metrics.yaml` (from eval-runner) + `evidence_pack/runs.yaml`, `env.yaml` (from exp-runner)
+- Regression thresholds from `rd/evaluation_plan.md`
+
+**Gate G4 (entry check):** validate `evidence_pack/metrics.yaml` against the schema in
+`references/reference.md` before wiring CI. Reject entries produced in
+`Mode: UNPLANNED` runs unless the user explicitly promotes them. Report
+`Gate G4: PASS | BLOCKED (schema/provenance issues)`.
 
 ## Output
 - recommended CI workflow steps (lint/test/coverage/artifacts)

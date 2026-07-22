@@ -1,7 +1,25 @@
-# 9개 스킬 입출력 스펙 정의
+# 12개 스킬 입출력 스펙 정의
 
 각 스킬의 표준 입출력 정의. defense-execution-manual 스킬이 매뉴얼을 생성할 때
 이 파일을 읽어 각 스텝의 INPUT/OUTPUT 카드를 구성한다.
+(STEP 0은 RFP가 없을 때만, STEP 10~11은 마무리 단계)
+
+---
+
+## STEP 0: defense-rfp-generator (조건부 — RFP가 없을 때만)
+
+**목적**: 유사 국내외 프로그램 조사 → 합성 RFP 생성 (`[SYNTHETIC-RFP]` 태그 필수)
+
+**INPUT 표준 목록**
+- 과제명 (+ 분야 키워드, 기간/예산 개략)
+
+**OUTPUT 표준 목록**
+- `YYMMDD_HHMM_synthetic_RFP_[주제약어].docx` + `.md` (헤더에 `[SYNTHETIC-RFP]` 태그)
+- 유사 프로그램 분석 요약
+
+**호출 명령어 예시**: "RFP 만들어줘", "RFP가 없어", "모의 RFP 생성"
+
+**게이트**: 태그는 STEP 1 이후 모든 산출물에 승계. 실제 RFP 확보 시 교체 + 태그 제거 절차.
 
 ---
 
@@ -16,7 +34,7 @@
 - 제안 기관 보유 기술 목록 (있으면)
 
 **OUTPUT 표준 목록**
-- RFP 분석 결과 .md 파일 (YYMMDD_HHMM_RFP_analysis.md)
+- RFP 분석 결과 .md 파일 (YYMMDD_HHMM_proposal_prep_[과제명약어].md)
 - 기능 요구사항 테이블 (기능 ID, 우선순위)
 - TRL 갭 분석표 (현재 TRL vs 목표 TRL)
 - 혁신성 포지셔닝 전략 (4막 서사 + 혁신 유형)
@@ -239,3 +257,36 @@ defense-proposal-detail-plan (Step 7)
 ```
 
 이전 단계 결과물(.md 파일)을 컨텍스트에 제공할수록 일관성 높은 제안서 작성 가능.
+
+---
+
+## STEP 10: defense-proposal-assembler (최종 병합)
+
+**목적**: 1~5장 pptx + figures + WBS/TBS를 최종 제안서 1건으로 병합, 병합 전 장 간 수치 일관성(KPI·TRL·예산·일정) 교차 검사
+
+**INPUT 표준 목록**
+- 장별 pptx 5종 (`[과제명약어]_과제개요.pptx` 등)
+- `*_kpi_benchmark_[과제명약어].md` (일관성 기준값)
+- `figures/`, `[과제명약어]_WBS_TBS.*` (있으면)
+
+**OUTPUT 표준 목록**
+- `[과제명약어]_제안서_최종_vN.pptx` (output_docs/)
+- `YYMMDD_HHMM_consistency_report_[과제명약어].md` (review_docs/)
+
+**호출 명령어 예시**: "제안서 합쳐줘", "최종 제안서 만들어줘", "제안서 통합"
+
+**게이트**: MISMATCH 1건 이상이면 병합 중단 → 해당 섹션 스킬로 반송이 기본.
+
+---
+
+## STEP 11: project-summarizer (회고·인수인계, 선택)
+
+**목적**: 제안서 작성 전 과정을 Key Decisions(결정|선택|기각 대안|이유) 중심으로 압축 기록
+
+**INPUT 표준 목록**
+- 대화 히스토리 + 작업폴더 산출물 + `0.FilesUpdate.xlsx`
+
+**OUTPUT 표준 목록**
+- `project_summary.md` (누적 갱신)
+
+**호출 명령어 예시**: "프로젝트 정리해줘", "제안서 작업 회고 만들어줘"

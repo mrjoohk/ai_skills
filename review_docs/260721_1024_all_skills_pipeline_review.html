@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>all_skills 전수 검토 — 프로세스 갭·게이트·명확성·신규 스킬 제안</title>
+<style>
+  body { font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; max-width: 1020px; margin: 0 auto; padding: 32px 24px; color: #1a1a2e; line-height: 1.6; background: #fafbfc; }
+  h1 { font-size: 1.45em; border-bottom: 3px solid #2c5f8a; padding-bottom: 8px; }
+  h2 { font-size: 1.18em; color: #2c5f8a; margin-top: 38px; border-left: 5px solid #2c5f8a; padding-left: 10px; }
+  h3 { font-size: 1.02em; color: #34495e; margin-top: 24px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.9em; background: #fff; }
+  th, td { border: 1px solid #c9d4de; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: #2c5f8a; color: #fff; }
+  tr:nth-child(even) td { background: #f2f6f9; }
+  code { background: #eef2f5; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+  .rationale { background: #eef2f8; border-left: 4px solid #5b7fa6; padding: 9px 13px; margin: 10px 0; font-size: 0.92em; }
+  .rationale b { color: #2c5f8a; }
+  .sev-h { color: #b03030; font-weight: bold; }
+  .sev-m { color: #c07a20; font-weight: bold; }
+  .sev-l { color: #4a7a4a; font-weight: bold; }
+  .diagram-box { background: #fff; border: 1px solid #c9d4de; border-radius: 6px; padding: 14px; margin: 14px 0; overflow-x: auto; }
+  .meta { color: #6a7a8a; font-size: 0.88em; }
+  .summary { background: #e8f0f8; border: 1px solid #5b7fa6; border-radius: 6px; padding: 12px 16px; margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<h1>all_skills 전수 검토 — 프로세스 갭 · 게이트 · 명확성 · 신규 스킬 제안</h1>
+<p class="meta">작성: 2026-07-21 10:24 · 대상: all_skills/ 6개 폴더, SKILL.md 43건 (파이프라인 8건 직접 정독 + 2개 병렬 조사 에이전트) · 상태: <b>조치 완료</b><br>
+조치 이력: 1차(경로·게이트, 10:30~) → 2차(배선·exp-runner) → 3차(proposal·assembler) → req_impl 일반화 → 4차 위생(11:10~, check_skill_sync.py·사본 드리프트 0건·트리거 경계·io-map 12스킬·artifact 수리) — 검증 스크립트 전 항목 PASS. 미조치: 설치본(.claude) 동기화는 사용자 몫 (<code>python scripts/check_skill_sync.py --apply</code>).</p>
+
+<div class="summary">
+<b>요약:</b> 스킬 개별 품질은 상위권(특히 uf-designer·if-designer·uf-implementor·uf-chain-validator는 게이트·검증 스크립트까지 갖춤). 문제는 <b>스킬 "사이"</b>에 있음 — ① 산출물 경로 규약이 3중 분열되어 파이프라인이 파일 수준에서 실제로 이어지지 않는 지점 다수, ② 선언된 게이트가 입력 규칙에서 무력화됨, ③ auditor→eval, 제안서→엔지니어링 배선 부재, ④ 사본 버전 드리프트. 발견: <span class="sev-h">HIGH 7</span> · <span class="sev-m">MED 9</span> · <span class="sev-l">LOW 6</span> + 신규 스킬 제안 4건(+스킬 신설 없이 해결 2건).
+</div>
+
+<h2>0. 검토 범위와 방법</h2>
+<table>
+<tr><th>폴더</th><th>스킬 수</th><th>성격</th><th>검토 방법</th></tr>
+<tr><td>core-engineering_pipeline_skills</td><td>16</td><td>설계→구현→평가→CI 본선 파이프라인</td><td>SKILL.md 8건 직접 정독 + 이전 세션 정독분</td></tr>
+<tr><td>req_impl_review_pipeline_skills</td><td>10</td><td>Claude 설계→Cursor 구현→Claude 리뷰 변형 파이프라인</td><td>조사 에이전트 + 핵심 파일 대조</td></tr>
+<tr><td>specific_skills</td><td>3</td><td>도메인 감사(gpu/rag/sim)</td><td>직접 정독 + 에이전트</td></tr>
+<tr><td>proposal_skills</td><td>12</td><td>방산 제안서 체인</td><td>조사 에이전트(전 파일 정독)</td></tr>
+<tr><td>artifact_skills / general_skills</td><td>2+1</td><td>독립 소비재 / 구버전 사본</td><td>에이전트</td></tr>
+</table>
+
+<h2>1. 프로세스 간 갭 (파이프라인 레벨)</h2>
+
+<h3>P-1. 산출물 경로 규약 3중 분열 <span class="sev-h">[HIGH — 파이프라인 단절의 근원]</span></h3>
+<p>GLOBAL_RULES Rule 9는 설계 아티팩트(<code>requirements.md</code>, <code>uf.md</code> 등)를 <code>rd/</code> 단일 정본으로 규정하지만, 실제 스킬들은 3개 규약을 씀:</p>
+<table>
+<tr><th>규약</th><th>따르는 스킬</th><th>결과</th></tr>
+<tr><td><code>rd/</code> (Rule 9)</td><td>theory-decomposer뿐. core context-engineering은 <code>.rd/</code>로 오타(숨김폴더화)</td><td>마스터인 core-engineering SKILL.md조차 <code>rd/</code> 무언급</td></tr>
+<tr><td>프로젝트 루트</td><td>req-elicitor, if-designer, uf-designer, uf-implementor, eval-planner…, req_impl 브리지 3종(루트+<code>docs/</code>만 스캔)</td><td>Rule 9대로 <code>rd/uf.md</code>에 쓰면 repo-doc-writer·code-reviewer가 <b>못 찾음</b> → 계약 리뷰 조용히 스킵</td></tr>
+<tr><td><code>reports/</code> (규정 외 제3규약)</td><td>gpu/rag/sim auditor, eval-runner(<code>reports/eval/</code>), uf-implementor·if-integrator(<code>reports/impl/</code>)</td><td>Rule 6(<code>review_docs/</code>)과 충돌, GLOBAL_RULES에 미편입</td></tr>
+</table>
+<div class="rationale"><b>판단 근거:</b> context-engineering 두 사본을 대조한 결과 core 사본은 <code>.rd/</code>(91–95행), req_impl 사본은 <code>./</code> 루트(91–108행)로 서로 다른 경로를 CLAUDE.md에 기입하도록 지시 — 경로 정본을 만드는 스킬 자체가 분열돼 있어 어느 파이프라인을 돌려도 하위 스킬 중 일부는 파일을 못 찾는 구조. 이것이 단일 최우선 수정 대상.</div>
+
+<h3>P-2. 게이트 선언과 입력 규칙의 모순 <span class="sev-h">[HIGH]</span></h3>
+<table>
+<tr><th>지점</th><th>선언</th><th>실제</th></tr>
+<tr><td>uf-implementor 진입</td><td>README·When to Use: "Stage 7.5 커버리지 리뷰 통과 후, <code>UNCOVERED</code> 없음"</td><td>Inputs: <code>uf_if_coverage_review.md</code> — "<b>recommended; skip if unavailable</b>" → 게이트가 권고로 격하, uf.md만 있으면 무검증 진행 가능</td></tr>
+<tr><td>if-integrator → eval-runner</td><td>통합 리포트에 PARTIAL/INTERFACE_ERROR 기록</td><td>PARTIAL 상태에서 eval-runner 진행을 막는 규칙 없음 (eval-runner는 "결과 데이터"만 있으면 동작)</td></tr>
+<tr><td>eval-runner 게이트 우회</td><td>—</td><td>"works without evaluation_plan" 명시 허용 — 유연성은 좋으나 <b>우회 실행 산출물에 비계획 실행 표식이 없음</b> → evidence로 승격될 위험</td></tr>
+<tr><td>if-designer Phase C</td><td><code>[UNCOVERED: REQ-###]</code> 리스트업</td><td>발견 시 정지/진행 정책 미명시 (uf-designer로 그냥 넘어갈 수 있음)</td></tr>
+</table>
+
+<h3>P-3. Stage 8 산출물 명칭 충돌 <span class="sev-m">[MED]</span></h3>
+<p>core-engineering Stage 8 출력은 <code>verification_plan.md</code>, 그러나 Stage 8 전담 스킬 eval-planner의 출력은 <code>evaluation_plan.md</code>. <code>verification_plan.md</code>는 생산자 없는 고아 산출물이 됨 (eval-planner의 validate 스크립트도 evaluation_plan만 검사). uf-designer의 UF Block "Verification Plan" 필드와 용어도 겹쳐 3중 혼선.</p>
+
+<h3>P-4. auditor → eval 배선 부재 <span class="sev-h">[HIGH]</span></h3>
+<p>README는 "auditor 3종이 eval-planner에 도메인 지표를 공급"한다고 선언하나: ① 연결이 각 auditor의 <code>references/README_kr.md</code> 개념 화살표로만 존재, SKILL.md 본문은 eval-planner/runner 무언급, ② gpu·sim은 eval-planner가 아니라 eval-runner를 지목(불일치), ③ auditor 산출(<code>reports/…</code>)을 eval-planner Inputs가 열거하지 않음 — <b>배출구와 흡입구가 연결 안 됨.</b> 사람이 수동으로 옮겨야 동작.</p>
+
+<h3>P-5. 실험 실행 주체 공백 <span class="sev-h">[HIGH — 신규 스킬 후보 ①]</span></h3>
+<p>eval-planner(계획) → <b>???</b> → eval-runner(결과 집계·리포트). eval-runner의 입력 "Experiment result data"를 생산하는 스킬이 파이프라인에 없음. 실험 실행·시드/환경 기록·<code>evidence_pack/runs.yaml</code> 생성은 어느 스킬 소관도 아님 (ci-evidence-automation은 CI 설정 권고 수준). 재현성 원칙("동일 데이터셋·시드 명시" — eval-runner Notes)을 지킬 실행 주체가 없음.</p>
+
+<h3>P-6. proposal_skills 핸드오프 단절 <span class="sev-h">[HIGH]</span></h3>
+<p>조사 에이전트 검증 결과(파일 인용 기준): ① 섹션 스킬 5종이 상위 산출물(<code>_proposal_prep_*.md</code>, <code>_kpi_benchmark_*.md</code>)을 <b>파일로 읽으라는 지시 0건</b> — 대화 맥락 의존이라 단독 호출·세션 단절 시 분석 유실, ② prep 출력 파일명이 SKILL.md와 skill-io-map.md에서 상이(<code>proposal_prep_*</code> vs <code>RFP_analysis.md</code>) → 자동 생성 매뉴얼이 존재하지 않는 파일명 안내, ③ overview 3항 KPI 공급원이 prep·kpi-benchmark·사용자 재질문 3중 — 스킬들이 강조하는 "수치 일관성"과 정면 충돌, ④ 합성 RFP가 경고문만으로 무검증 전파, ⑤ 장별 pptx를 최종 제안서로 병합하는 단계 부재, ⑥ 저장 위치 3종(<code>/mnt/proposal/</code>, <code>[작업폴더]/</code>, 루트) 혼재 + 다과제 파일 충돌 가능 명명.</p>
+
+<h3>P-7. 제안서 ↔ 엔지니어링 두 세계 단절 <span class="sev-m">[MED — 신규 스킬 후보 ②]</span></h3>
+<p>같은 과제라도 KPI가 defense-kpi-benchmark(제안서)와 eval-planner(연구 실행)에서 <b>독립적으로 두 번</b> 작성됨. 과제 선정 후 "제안서 KPI/WBS → requirements.md·evaluation_plan.md 시드"로 넘기는 전환 스킬이 없어, 제안서에서 약속한 수치와 실행 단계 목표치가 어긋나도 감지 불가.</p>
+
+<h3>P-8. 사본 버전 드리프트 <span class="sev-m">[MED]</span></h3>
+<table>
+<tr><th>사본</th><th>상태</th></tr>
+<tr><td>all_skills vs .claude/skills</td><td>uf-implementor(+25행: TDD RED/GREEN), uf-chain-validator(+6행: Beyonce Rule), uf-if-debug-mapper(145 vs 60행: Stop-the-Line·5단계 트리아지) — <b>all_skills가 최신, 설치본(.claude)이 구버전</b></td></tr>
+<tr><td>project-summarizer ×4</td><td>2개 버전 분기 (core/req_impl은 Key Decisions 표 포함 v2.1, general/proposal은 구버전)</td></tr>
+<tr><td>context-engineering ×2</td><td>경로 규약 상이 (P-1의 원인)</td></tr>
+<tr><td>공용 스킬 7종</td><td>두 파이프라인 폴더에 중복 사본 (req-elicitor, if-designer, uf-designer, uf-chain-validator, uf-if-debug-mapper 등) — 현재는 동일하나 정본 미지정이라 드리프트 예정</td></tr>
+</table>
+
+<h3>파이프라인 갭 지도</h3>
+<div class="diagram-box">
+<svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg" font-family="'Malgun Gothic',sans-serif">
+  <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5b7fa6"/></marker></defs>
+  <text x="20" y="28" font-size="13" font-weight="bold" fill="#2c5f8a">엔지니어링 본선</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="20" y="40" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="66" y="60">req-elicitor</text>
+    <rect x="142" y="40" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="188" y="60">if-designer</text>
+    <rect x="264" y="40" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="310" y="60">uf-designer</text>
+    <rect x="386" y="40" width="100" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="436" y="60">uf-implementor</text>
+    <rect x="516" y="40" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="562" y="60">if-integrator</text>
+    <rect x="638" y="40" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="684" y="60">eval-runner</text>
+    <rect x="760" y="40" width="120" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="820" y="60">ci-evidence-auto</text>
+    <line x1="112" y1="57" x2="142" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="234" y1="57" x2="264" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="356" y1="57" x2="386" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="486" y1="57" x2="516" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="608" y1="57" x2="638" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="730" y1="57" x2="760" y2="57" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+  </g>
+  <g font-size="10" fill="#b03030" text-anchor="middle" font-weight="bold">
+    <text x="371" y="95">◆G3 게이트 무력화</text>
+    <text x="371" y="109">(coverage review "skip 가능")</text>
+    <text x="623" y="95">✗P-5 실험 실행</text>
+    <text x="623" y="109">주체 공백</text>
+    <text x="150" y="95">◆G1 [UNRESOLVED]</text>
+    <text x="150" y="109">이월 정책 없음</text>
+  </g>
+  <text x="20" y="150" font-size="13" font-weight="bold" fill="#2c5f8a">지원 레이어</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="20" y="162" width="130" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="85" y="183">auditor 3종 (gpu/rag/sim)</text>
+    <rect x="200" y="162" width="92" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="246" y="183">eval-planner</text>
+    <rect x="342" y="162" width="120" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="402" y="183">theory-decomposer</text>
+    <rect x="512" y="162" width="130" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="577" y="183">uf-chain-validator</text>
+  </g>
+  <g font-size="10" fill="#b03030" font-weight="bold">
+    <text x="158" y="176">✗P-4 배선 없음</text>
+    <text x="158" y="189">(README_kr만)</text>
+    <text x="240" y="215" text-anchor="middle">✗P-3 verification_plan.md vs evaluation_plan.md</text>
+  </g>
+  <text x="20" y="255" font-size="13" font-weight="bold" fill="#2c5f8a">Cursor 변형 (req_impl)</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="20" y="267" width="150" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="95" y="288">(공용 상류: req→if→uf)</text>
+    <rect x="220" y="267" width="110" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="275" y="288">repo-doc-writer</text>
+    <rect x="380" y="267" width="130" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="445" y="288">cursor-task-formatter</text>
+    <rect x="560" y="267" width="100" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="610" y="288">code-reviewer</text>
+    <line x1="170" y1="284" x2="220" y2="284" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="330" y1="284" x2="380" y2="284" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="510" y1="284" x2="560" y2="284" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+  </g>
+  <text x="195" y="320" font-size="10" fill="#b03030" font-weight="bold">✗P-1 rd/ 미스캔 — 루트/docs/만 탐색, Rule 9와 충돌</text>
+  <text x="20" y="360" font-size="13" font-weight="bold" fill="#2c5f8a">제안서 체인</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="20" y="372" width="120" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="80" y="393">rfp-gen → prep → kpi</text>
+    <rect x="190" y="372" width="150" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="265" y="393">섹션 스킬 5종 (1~5장)</text>
+    <rect x="390" y="372" width="130" height="34" rx="5" fill="#fff" stroke="#5b7fa6"/><text x="455" y="393">diagram / wbs-tbs</text>
+    <line x1="140" y1="389" x2="190" y2="389" stroke="#b03030" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+    <line x1="340" y1="389" x2="390" y2="389" stroke="#5b7fa6" stroke-width="1.5" marker-end="url(#a2)"/>
+  </g>
+  <g font-size="10" fill="#b03030" font-weight="bold">
+    <text x="163" y="366" text-anchor="middle">✗P-6 파일 소비 0건</text>
+    <text x="600" y="380">✗ 최종 병합 단계 부재</text>
+    <text x="600" y="394">✗P-7 → 엔지니어링 전환 부재</text>
+  </g>
+</svg>
+</div>
+
+<h2>2. 스킬 자체의 부족한 점 (개별)</h2>
+<table>
+<tr><th>스킬</th><th>심각도</th><th>부족한 점</th></tr>
+<tr><td>ci-evidence-automation</td><td class="sev-m">MED</td><td>수트에서 가장 빈약. 실행 단계(Steps) 없음, 산출 파일명 미정("recommended steps" 수준), 트리거 문구 거의 없음(한 줄 description), evidence_pack 스키마가 reference에만 존재. uf-chain-validator Gate 3(증적 검사)과 역할 경계 미정의.</td></tr>
+<tr><td>core-engineering</td><td class="sev-m">MED</td><td>마스터 레퍼런스인데 <code>rd/</code> 무언급(P-1), Stage 8 산출물명 충돌(P-3). 8단계 정의와 하위 스킬 위임표는 우수하나 자신이 직접 실행될 때와 하위 스킬 위임 시의 경계 미정("이 스킬이 직접 8단계를 다 하는가?").</td></tr>
+<tr><td>req-elicitor</td><td class="sev-l">LOW</td><td>Phase B가 대화형 필수 — 배치/비대화 모드 미정의. <code>[UNRESOLVED]</code> 항목의 하류 이월 규칙 없음(if-designer는 clarification_log를 입력으로 안 받음).</td></tr>
+<tr><td>if-integrator</td><td class="sev-l">LOW</td><td>워크플로 G(theory-decomposer)가 <code>theory_tree.md</code>를 입력으로 선언했으나 if-integrator SKILL.md Inputs에는 <code>if_decomposition.md</code>만 존재 — G 연동이 가이드 문서에만 있고 스킬 본문에 없음.</td></tr>
+<tr><td>eval-runner</td><td class="sev-m">MED</td><td>실험 데이터 입력의 생산자 미정(P-5). 계획 우회 실행 시 리포트에 "unplanned run" 표식 없음.</td></tr>
+<tr><td>auditor 3종</td><td class="sev-m">MED</td><td>입력(텐서 shape/방정식/코퍼스 설정)을 uf.md에서 추출하는지 사용자 제공인지 미정의. 투입 시점이 매뉴얼 3곳에서 서로 다름(③후 / ②후 / if-integrator 단계). 산출물이 <code>reports/</code>行으로 하류 소비 계약 없음(P-4).</td></tr>
+<tr><td>uf-if-debug-mapper</td><td class="sev-l">LOW</td><td>내용은 대폭 개선(Stop-the-Line, 5단계 트리아지)됐으나 산출 파일명 명시가 약함 — README는 <code>debug_map.md</code>를 소비 계약으로 선언하는데 SKILL.md 본문에 파일명 규정 부재.</td></tr>
+<tr><td>code-reviewer</td><td class="sev-l">LOW</td><td>출력 파일명 미고정(Pipeline_MANUAL은 <code>review_report.md</code>로 호칭) — cursor-task-formatter Mode B의 입력 계약이 느슨.</td></tr>
+<tr><td>dashboard-designer</td><td class="sev-m">MED</td><td>타 세션 하드코딩 경로(<code>/sessions/ecstatic-nifty-wozniak/…</code>) — 이식 즉시 깨짐. <code>dashboard_spec.md</code>→uf-designer 연결이 명목상(uf-designer 입력은 if_decomposition.md).</td></tr>
+<tr><td>travel-planner-html</td><td class="sev-l">LOW</td><td>유일하게 YAML frontmatter 부재 → name/description 기반 자동 트리거 불가.</td></tr>
+<tr><td>defense-wbs-tbs / defense-diagram</td><td class="sev-l">LOW</td><td>빈 <code>references/</code>·<code>assets/</code> 디렉토리(미사용 스캐폴딩). wbs-tbs는 SKILL.md에 참조 블록 자체가 없음.</td></tr>
+<tr><td>proposal 섹션 스킬 5종</td><td class="sev-h">HIGH</td><td>전제조건 절 부재(prep/kpi 선행 명시 0건), 상위 산출물 파일 소비 지시 0건(P-6).</td></tr>
+</table>
+
+<h2>3. 게이트가 필요한 지점 (제안)</h2>
+<table>
+<tr><th>ID</th><th>위치</th><th>게이트 내용</th><th>구현 방식</th></tr>
+<tr><td>G1</td><td>req-elicitor → if-designer</td><td><code>[UNRESOLVED]</code> 잔존 항목이 REQ 수치 임계값에 걸리면 BLOCKED, 아니면 WARN 후 진행</td><td>req-elicitor Handoff 절 + if-designer Input 검사에 추가</td></tr>
+<tr><td>G2</td><td>uf-designer → uf-implementor</td><td>Stage 7.5 커버리지 리뷰를 <b>required</b>로 승격 — <code>uf_if_coverage_review.md</code> 없거나 <code>UNCOVERED</code> 존재 시 BLOCKED</td><td>uf-implementor Inputs의 "skip if unavailable" 문구 삭제·격상</td></tr>
+<tr><td>G3</td><td>if-integrator → eval-runner</td><td>통합 리포트에 <code>INTERFACE_ERROR</code>/<code>PARTIAL</code> 존재 시 eval 진입 차단 (디버그 플로우로 라우팅)</td><td>if-integrator Handoff + eval-runner Step 1 전제 검사</td></tr>
+<tr><td>G4</td><td>eval-runner → ci-evidence-automation</td><td><code>evidence_pack/metrics.yaml</code> 스키마 검증 + 계획(evaluation_plan) 기반 실행 여부 표식</td><td>기존 validate 스크립트 확장</td></tr>
+<tr><td>G5</td><td>rfp-generator → prep</td><td>합성 RFP 사용 시 모든 하류 산출물에 <code>[SYNTHETIC-RFP]</code> 태그 강제 + 실 RFP 교체 확인 절차</td><td>rfp-generator 출력 헤더 + prep 입력 검사</td></tr>
+<tr><td>G6</td><td>prep/kpi → 섹션 스킬 5종</td><td>전제조건 절 신설: prep 분석 승인 여부 + KPI 확정 여부 체크, 미충족 시 사용자 확인 후 진행</td><td>섹션 스킬 5종 SKILL.md 상단에 공통 전제 블록</td></tr>
+<tr><td>G7</td><td>스킬 사본 관리</td><td>all_skills(정본) vs .claude(설치본) 불일치 검출</td><td>§4 제안 스킬 또는 스크립트</td></tr>
+</table>
+<div class="rationale"><b>판단 근거:</b> G1–G4는 이미 각 스킬에 검증 스크립트(<code>scripts/validate_*.py</code>)가 있어 게이트 신설 비용이 낮음 — 부족한 것은 검사기가 아니라 "다음 스킬이 이전 검사 결과를 요구하는 문장". G5–G6는 조사 에이전트가 실제 파일에서 전제조건 절 0건임을 확인. 게이트 전담 신규 스킬 1개(§4-A)로 묶는 방안과 각 스킬에 분산 반영하는 방안 중, 분산 반영이 GLOBAL_RULES 원칙 2(단순성)에 부합하나 게이트 정의가 7곳에 흩어지는 단점이 있어 §4에서 양쪽을 비교.</div>
+
+<h2>4. 신규 스킬 제안</h2>
+<table>
+<tr><th>제안</th><th>우선</th><th>역할</th><th>연동 지점</th><th>판단</th></tr>
+<tr><td><b>A. exp-runner</b> (실험 실행자)</td><td class="sev-h">P1</td><td>evaluation_plan.md를 읽어 실험을 실제 실행: 설정/시드/환경 고정, <code>evidence_pack/runs.yaml</code>·<code>env.yaml</code> 생성, 결과 데이터를 eval-runner 입력 형식으로 배출</td><td>eval-planner → <b>exp-runner</b> → eval-runner. GLOBAL_RULES의 Evidence Pack 스키마(runs/env)가 이미 정의돼 있어 계약 즉시 확보</td><td>✅ 신설 권장 — P-5 공백은 기존 스킬 수정으로 못 메움 (실행은 별도 책임)</td></tr>
+<tr><td><b>B. pipeline-gatekeeper</b></td><td class="sev-m">P2</td><td>핸드오프 지점명을 받아 해당 게이트(G1~G6)의 전제 산출물 존재+validate 스크립트 실행+PASS/BLOCKED 판정 리포트</td><td>기존 <code>scripts/validate_*.py</code> 5종 오케스트레이션</td><td>△ 대안 비교: 각 스킬에 전제조건 절 분산 반영(수정 7건)이 더 단순. 다만 게이트 목록의 단일 정본이 생기는 장점. <b>1차로 분산 반영, 게이트가 10개 이상 되면 신설</b> 권장</td></tr>
+<tr><td><b>C. proposal-assembler</b></td><td class="sev-m">P2</td><td>장별 pptx(1~5장)+figures를 최종 제안서 단일 파일로 병합, 수치 일관성(KPI·예산·일정) 교차 검사 후 불일치 리포트</td><td>섹션 스킬 5종 + wbs-tbs 출력 → 최종 산출물. P-6의 "조각에서 끝남" 해결</td><td>✅ 신설 권장 — 병합+교차검사는 어느 기존 스킬의 책임도 아님</td></tr>
+<tr><td><b>D. proposal-to-engineering bridge</b></td><td class="sev-l">P3</td><td>선정된 제안서의 KPI/WBS/TBS → <code>requirements.md</code> 시드(REQ Block 초안)·<code>evaluation_plan.md</code> Baseline/Target 시드로 변환</td><td>defense-kpi-benchmark·wbs-tbs 출력 → req-elicitor·eval-planner 입력. P-7 해결</td><td>△ 수요 발생 시(과제 선정 후) 신설 — 지금은 설계만 예약</td></tr>
+<tr><td>E. (신설 불필요) auditor 배선</td><td class="sev-h">P1</td><td>auditor 3종이 표준 파일 <code>rd/domain_metrics.md</code>(metric·임계값·근거)를 배출하고 eval-planner Inputs에 해당 파일 추가</td><td>기존 4개 스킬 수정으로 해결</td><td>✅ 스킬 신설보다 수정 — 전달물이 표 하나라 스킬화는 과설계 (원칙 2)</td></tr>
+<tr><td>F. (신설 불필요) repo-sync 검사</td><td class="sev-m">P2</td><td>all_skills(정본)↔.claude(설치본)↔폴더 간 사본 md5 대조 스크립트 <code>scripts/check_skill_sync.py</code> + 정본 선언 문서</td><td>P-8 해결</td><td>✅ 스크립트로 충분 — 스킬화 불필요</td></tr>
+</table>
+
+<h2>5. 명확하지 않은 요구사항·사용시점 (트리거 충돌 포함)</h2>
+<table>
+<tr><th>충돌/모호</th><th>내용</th><th>정리안</th></tr>
+<tr><td>"벤치마크" 트리거 3중</td><td>eval-planner("plan benchmarks") ↔ defense-kpi-benchmark("벤치마크 조사") ↔ defense-proposal-prep(Step 3 벤치마킹 수행)</td><td>description에 도메인 한정어 추가: eval-planner="평가 지표·데이터셋", kpi-benchmark="제안서 SoA·KPI", prep은 kpi-benchmark 위임으로 축소</td></tr>
+<tr><td>"WBS/일정" 트리거 2중</td><td>defense-proposal-tech-analysis(WBS 표) ↔ defense-wbs-tbs(WBS 다이어그램·간트)</td><td>"3장 서술=tech-analysis, 시각화·xlsx=wbs-tbs" disambiguation 문구를 양쪽 description에 삽입</td></tr>
+<tr><td>구현 검증 2계열</td><td>uf-chain-validator(3-Gate) ↔ code-reviewer(3렌즈) — 어느 쪽을 쓸지는 "어느 파이프라인이냐"에 달렸으나 두 스킬 모두 상대를 무언급</td><td>각 SKILL.md에 "Claude 구현=chain-validator / Cursor 구현=code-reviewer" 상호 참조 1줄</td></tr>
+<tr><td>ci-evidence-automation 사용시점</td><td>"When CI becomes noisy" 등 주관적 조건뿐</td><td>객관 조건으로 교체: "eval-runner가 metrics.yaml을 처음 생성했을 때 / evidence_pack 스키마 확장 시"</td></tr>
+<tr><td>auditor 투입 시점</td><td>매뉴얼 3곳이 서로 다름(P-4 참조)</td><td>정본 1곳(Engineering_MANUAL)으로 수렴 + 나머지는 링크</td></tr>
+<tr><td>실행 매뉴얼 2중</td><td>proposal: 정적 MANUAL.md(12스킬) ↔ defense-execution-manual(9스킬) 범위 불일치 — rfp-generator·project-summarizer 누락</td><td>skill-io-map.md를 정본으로 선언하고 12스킬 전체로 확장</td></tr>
+<tr><td>project-summarizer 소속</td><td>4개 폴더 사본, proposal 사본은 제안서 특화 0%</td><td>general 1벌 정본화(v2.1) + 각 파이프라인은 참조만</td></tr>
+</table>
+
+<h2>6. 잘 되어 있는 점 (유지)</h2>
+<p>uf-designer의 Verification Ownership 3분류(UF-local/guard-rail+chain/IF-acceptance)와 uf-chain-validator의 3-Gate가 정확히 맞물리는 설계는 수트의 백미 — "모든 UF에 단위 테스트 강제" 같은 거짓 정밀도를 피한 성숙한 규칙. if-designer의 Hyrum's Law·최소 노출 원칙, uf-implementor의 RED/GREEN TDD·테스트 안티패턴 표, uf-if-debug-mapper의 Stop-the-Line 규칙, req-elicitor·if-designer·uf-designer의 validate 스크립트 동봉도 우수. 이 품질 기준을 ci-evidence-automation과 proposal 체인에 수평 전개하는 것이 이번 개선의 방향.</p>
+
+<h2>7. 권고 실행 순서 (승인 시)</h2>
+<table>
+<tr><th>차수</th><th>작업</th><th>해결하는 발견</th></tr>
+<tr><td>1차 (경로·게이트)</td><td>① <code>rd/</code> 규약 통일: core-engineering·파이프라인 스킬 산출 경로에 <code>rd/</code> 명시, context-engineering <code>.rd/</code> 오타 수정·두 사본 통일, req_impl 브리지 3종 스캔 경로에 <code>rd/</code> 추가, <code>reports/</code>를 GLOBAL_RULES에 정식 편입 ② G2 게이트 격상(uf-implementor) ③ Stage 8 명칭 통일(<code>evaluation_plan.md</code>로 단일화, core-engineering 수정)</td><td>P-1, P-2, P-3</td></tr>
+<tr><td>2차 (배선)</td><td>④ auditor 3종→<code>rd/domain_metrics.md</code> 배출 + eval-planner Inputs 추가 ⑤ exp-runner 스킬 신설 ⑥ G1·G3·G4 게이트 문구 반영</td><td>P-4, P-5</td></tr>
+<tr><td>3차 (proposal)</td><td>⑦ 섹션 스킬 5종에 파일 소비·전제조건 절 추가, prep 파일명 통일, KPI 단일 소유권(kpi-benchmark) ⑧ proposal-assembler 신설 ⑨ G5 합성 RFP 태그</td><td>P-6</td></tr>
+<tr><td>4차 (위생)</td><td>⑩ check_skill_sync.py + 정본 선언 ⑪ 트리거 disambiguation 일괄 반영 ⑫ dashboard-designer 경로·travel-planner frontmatter·빈 디렉토리 정리</td><td>P-8, §5</td></tr>
+</table>
+<div class="rationale"><b>판단 근거(순서):</b> 경로 통일(1차)이 선행되지 않으면 이후 어떤 배선·게이트 수정도 "찾지 못하는 파일" 위에 쌓임. 배선(2차)은 경로 확정 후에만 파일명이 유효. proposal(3차)은 독립 체인이라 병렬 가능하나 영향 범위가 커서 엔지니어링 본선 안정화 후 권장. exp-runner와 proposal-assembler 신설은 각 차수에 포함.</div>
+
+</body>
+</html>

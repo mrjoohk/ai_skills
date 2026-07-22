@@ -9,6 +9,18 @@ description: >
 
 # Defense Proposal — 연구개발 방안 스킬
 
+## 전제조건 (Gate G6 — 진입 전 확인)
+
+이 스킬은 사전 분석 산출물을 **파일로** 소비한다 (대화 맥락 의존 금지):
+
+1. `*_proposal_prep_[과제명약어].md` (defense-proposal-prep) — 기술 벤치마킹(1항 동향)·혁신 서사(4항) 로드
+2. `*_kpi_benchmark_[과제명약어].md` (defense-kpi-benchmark) — **KPI 수치의 단일 정본**
+3. 과제 개요 산출물(`[과제명약어]_과제개요.pptx` / `*_[과제명약어]_overview.md`)이 있으면 목표·범위를 로드
+4. RFP 문서 헤더에 `[SYNTHETIC-RFP]` 태그가 있으면 본 섹션 산출물 헤더에도 동일 태그 승계
+
+파일이 없으면 선행 스킬 실행을 안내한다. 사용자가 "없이 진행"을 명시한 경우에만
+진행하되 산출물 헤더에 `PREREQ-SKIPPED` 기록. 수치는 위 파일 값을 그대로 사용 (재작성 금지).
+
 방산 연구 제안서의 **연구개발 방안** 섹션(4개 항목)을 작성한다.
 이 섹션은 "왜 우리가, 이 방법으로, 지금 해야 하는가"를 설득력 있게 제시하는 핵심 섹션이다.
 
@@ -129,7 +141,7 @@ description: >
 
 1. 사용자 검토 후 승인 (Rule 1)
 2. `[작업폴더]/[과제명약어]_연구개발방안.pptx` 저장
-3. `YYMMDD_HHMM_rdplan_draft.md` 분석 저장 (Rule 2)
+3. `YYMMDD_HHMM_[과제명약어]_rd_plan.md` 분석 저장 (Rule 2)
 4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
 
 ---

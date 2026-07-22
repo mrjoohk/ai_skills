@@ -158,8 +158,19 @@ Example: `260318_1430_uf_status_analysis.md`, `260318_1430_uf_architecture.html`
 - `if_decomposition.md`
 - `uf.md`
 - `uf_split/` (directory and its contents)
+- `uf_if_coverage_review.md`
+- `evaluation_plan.md` (Stage 8 canonical output — replaces the legacy name `verification_plan.md`)
+- `domain_metrics.md` (domain auditor → eval-planner handoff)
+- theory-decomposer artifacts: `source_survey.md`, `theory_statement.md`, `theory_tree.md`, `eq.md`, `eq_coverage_review.md`
 
 > **Note**: These files must NOT be placed in `review_docs/` or `output_docs/`. The `rd/` directory is the single canonical location for all design artifacts.
+
+### Rule 10 — Directory for Implementation & Audit Reports
+> Machine-generated implementation, integration, audit, and evaluation reports produced by pipeline skills are saved under `reports/`:
+> `reports/impl/` (uf-implementor, if-integrator), `reports/eval/` (eval-runner), `reports/physics/` (sim-physics-auditor), `reports/rag/`, `reports/gpu/`.
+> **If `reports/` does not exist, create it first.**
+
+**Distinction**: `reports/` holds skill-generated evidence artifacts consumed by downstream skills; `review_docs/` (Rule 6) holds human-facing analysis documents awaiting user review. Do not mix the two.
 
 ### Workflow Summary
 ```

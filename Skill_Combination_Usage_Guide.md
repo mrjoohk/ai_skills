@@ -339,13 +339,81 @@ Output: reports/eval/sim_validation_<timestamp>.md
 
 ---
 
+## Workflow G — Theory-to-Dynamics Reconstruction (no reference code)
+
+**Scenario:** A domain theory (dynamics, signal model, coupled physics) must be turned into
+equations and executable dynamics, but no — or only partial — open-source reference exists.
+Decompose the theory into atomic EQ Blocks, then reuse the standard pipeline to implement
+and merge them back into the original dynamics.
+
+**Skills used:** `theory-decomposer` → `uf-implementor` → `if-integrator` → `sim-physics-auditor` → `eval-planner` → `eval-runner`
+
+### Step 1 — Decompose Theory into EQ Blocks (theory-decomposer)
+```
+/theory-decomposer
+이론: [이론/현상 설명, 상태벡터와 입력]
+domain_hint: [dynamics | control | signal | thermal | ...]
+max_depth: 4
+
+Expected outputs (rd/):
+- source_survey.md        (T0 verdict: FOUND-CODE | FOUND-BENCH | NONE)
+- theory_statement.md
+- theory_tree.md          (if_decomposition.md-compatible)
+- eq.md                   (uf.md-compatible EQ Blocks with Equation/Assumptions/Validity/Source)
+- eq_coverage_review.md
+```
+
+**Gate:** `eq_coverage_review.md` must show no `UNCOVERED` (missing coupling terms) and
+no `INCOMPATIBLE` (contradictory assumptions) before proceeding.
+
+### Step 2 — Implement Each Equation (uf-implementor)
+```
+/uf-implementor
+Read rd/eq.md and rd/eq_coverage_review.md.
+Implement each EQ Block as one Python function:
+docstring = Equation + Source, runtime guard = Validity Domain,
+unit tests = dimensional check + limiting cases from the Verification Plan.
+```
+
+### Step 3 — Merge into Dynamics Module (if-integrator)
+```
+/if-integrator
+Read rd/theory_tree.md (coupling edges = call graph) and src/uf/.
+Assemble EQ functions into the full dynamics entry point (e.g., xdot = f(x, u)).
+Frame transforms are explicit UF calls, never implicit.
+```
+
+### Step 4 — Physics Audit (sim-physics-auditor)
+```
+/sim-physics-auditor
+Audit the merged dynamics: unit/dimension consistency, frame transforms,
+timestep criteria, numerical stability.
+```
+
+### Step 5 — Verify per T0 Verdict (eval-planner → eval-runner)
+```
+/eval-planner
+Read rd/source_survey.md and rd/eq.md.
+Register the oracle per T0 verdict:
+- FOUND-CODE : cross-check scenarios against the reference implementation
+- FOUND-BENCH: published benchmark values ± tolerance
+- NONE       : conservation laws + limiting-case reductions + symmetry checks
+
+/eval-runner
+Compute the oracle metrics and produce the validation report.
+```
+
+---
+
 ## Skill Dependency Summary
 
 | Skill | Requires (input from) | Produces (output for) |
 |---|---|---|
 | `core-engineering` | User prompt | `eval-planner`, `uf-implementor`, `agent-orchestration` |
-| `eval-planner` | `requirements.md`, `uf.md` | `eval-runner` |
-| `eval-runner` | `evaluation_plan.md` + experiment results | `ci-evidence-automation` |
+| `theory-decomposer` | Theory/phenomenon description | `uf-implementor` (`rd/eq.md`), `if-integrator` (`rd/theory_tree.md`), `eval-planner` (`rd/source_survey.md`) |
+| `eval-planner` | `rd/requirements.md`, `rd/uf.md`, `rd/domain_metrics.md` | `exp-runner`, `eval-runner` |
+| `exp-runner` | `rd/evaluation_plan.md`, `src/if/` | `eval-runner` (`evidence_pack/runs.yaml`, `results/`) |
+| `eval-runner` | `rd/evaluation_plan.md` + `evidence_pack/runs.yaml` | `ci-evidence-automation` |
 | `uf-implementor` | `uf.md`, `uf_if_coverage_review.md` | `if-integrator` |
 | `if-integrator` | `if_list.md`, `src/uf/` | `eval-runner`, `ci-evidence-automation` |
 | `uf-chain-validator` | `uf.md`, `src/uf/` | `uf-implementor` (fix cycle) |

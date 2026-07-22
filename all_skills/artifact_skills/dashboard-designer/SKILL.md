@@ -87,13 +87,14 @@ back-to-back turns) to collect answers for the axes defined in `references/axes.
 ### Phase B — Write the spec (autonomous)
 
 Using answers from Phase A, copy `assets/dashboard_spec_template.md` and fill in
-every section. Save as `dashboard_spec.md` in the user's output folder
-(`/sessions/ecstatic-nifty-wozniak/mnt/AI_TOOLS/` if there is no project folder
-context, otherwise the project's `docs/` or similar).
+every section. Save as `dashboard_spec.md` in the project's `rd/` directory
+(GLOBAL_RULES Rule 9) when a project folder exists; otherwise in the current
+session's output folder. Never hard-code an absolute session path.
 
-The spec must be complete enough that a different engineer (or Cursor, or the
-`uf-designer` skill) could read it alone and build the dashboard without the user
-in the room. That means: resolved values for all 6 axes, explicit list of widgets
+The spec must be complete enough that a different engineer (or an external coding
+agent) could read it alone and build the dashboard without the user in the room.
+If the dashboard becomes part of an engineering pipeline, feed this spec to
+`req-elicitor` as problem input (it is not a direct `uf-designer` input). That means: resolved values for all 6 axes, explicit list of widgets
 with their data bindings, layout sketch in plain text, and a "TODOs for
 implementation" section listing anything that was deferred.
 

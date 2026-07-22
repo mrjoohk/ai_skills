@@ -30,7 +30,7 @@
 | 5 | `if_list.md` | 통합기능(IF) 목록 및 시스템 경계 다이어그램 |
 | 6 | `if_decomposition.md` | IF별 서브기능 분해 및 의존성 그래프 |
 | 7 | `uf.md` | 단위기능(UF) 상세 정의 (I/O 컨트랙트 포함) |
-| 8 | `verification_plan.md` | 테스트 계획, 커버리지 목표, 회귀 임계값 |
+| 8 | `evaluation_plan.md` | 테스트 계획, 커버리지 목표, 회귀 임계값 |
 | 8 | `evidence_pack/` | 증거 팩 디렉토리 구조 제안 |
 
 ## 슬래시 명령 예시
@@ -168,7 +168,7 @@ unit/integration/e2e 테스트 계획과 evidence_pack/ 구조를 제안하라.
 | 5 | IF 도출 | core-engineering | if_list.md |
 | 6 | IF 분해 | core-engineering | if_decomposition.md |
 | 7 | UF 도출 | core-engineering | uf.md (UF 블록) |
-| 8 | 검증 계획 | core-engineering + ci-evidence-automation | verification_plan.md, evidence_pack/ |
+| 8 | 검증 계획 | core-engineering + ci-evidence-automation | evaluation_plan.md, evidence_pack/ |
 
 ## 품질 검증 체크리스트
 

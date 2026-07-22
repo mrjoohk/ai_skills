@@ -1,6 +1,6 @@
 ---
 name: eval-planner
-description: "Designs domain-appropriate evaluation metrics, thresholds, and benchmark plans from REQ/UF/IF blocks or design documents. Use as the dedicated entry point for core-engineering Stage 8. Trigger when the user asks to define evaluation criteria, set acceptance thresholds, plan benchmarks, or translate requirements into measurable metrics — even if they don't explicitly mention 'Stage 8' or 'evaluation plan'. Also trigger when a design document exists and the user wants to know how to measure success."
+description: "Designs domain-appropriate evaluation metrics, thresholds, and benchmark plans from REQ/UF/IF blocks or design documents. Use as the dedicated entry point for core-engineering Stage 8. Trigger when the user asks to define evaluation criteria, set acceptance thresholds, plan benchmarks, or translate requirements into measurable metrics — even if they don't explicitly mention 'Stage 8' or 'evaluation plan'. Also trigger when a design document exists and the user wants to know how to measure success. Boundary: engineering evaluation design only — defense-proposal KPI/SoA benchmarking belongs to defense-kpi-benchmark."
 user-invocable: true
 allowed-tools: Read, Write
 ---
@@ -22,10 +22,12 @@ Dedicated entry point for core-engineering **Stage 8** (Verification & Evidence 
 ---
 
 ## Inputs (in order of priority)
-1. `uf.md` — UF blocks (Goal, I/O Contract, Acceptance Criteria)
-2. `requirements.md` — REQ blocks
-3. Design documents (WBS, design doc, etc.)
-4. Domain hint (auto-inferred from documents if not provided)
+1. `rd/uf.md` — UF blocks (Goal, I/O Contract, Acceptance Criteria). Design artifacts live under `rd/` per GLOBAL_RULES Rule 9 — check `rd/` first, then project root for legacy layouts.
+2. `rd/requirements.md` — REQ blocks
+3. `rd/domain_metrics.md` — domain auditor handoff (gpu-hpc-guard / sim-physics-auditor / rag-data-quality). **If present, merge its metrics and thresholds into Step 2/3 and cite the originating auditor per metric.**
+4. `rd/source_survey.md` — theory-decomposer T0 verdict (Workflow G). Routes the oracle: FOUND-CODE → reference cross-check, FOUND-BENCH → published values, NONE → conservation/limiting-case checks.
+5. Design documents (WBS, design doc, etc.)
+6. Domain hint (auto-inferred from documents if not provided)
 
 ---
 
@@ -65,7 +67,10 @@ Specify the evaluation datasets for each task:
 - Specify split criteria (test set, held-out set)
 
 ### Step 5 — Generate evaluation_plan.md
-Generate the file using the Output Template below.
+Generate `rd/evaluation_plan.md` using the Output Template below.
+
+> `rd/evaluation_plan.md` is the **canonical Stage 8 output** (GLOBAL_RULES Rule 9).
+> The legacy name `verification_plan.md` is deprecated — do not create both.
 
 ---
 

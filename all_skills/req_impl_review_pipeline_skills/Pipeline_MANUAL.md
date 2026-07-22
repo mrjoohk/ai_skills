@@ -1,7 +1,15 @@
 # Req → Impl → Review Pipeline Skills — 스킬 연동 사용 매뉴얼
 
-> **디렉토리 목적:** Claude와 Cursor를 연결하는 AI 협업 개발 파이프라인.
-> 요구사항 정의부터 설계, Cursor 구현 지시, 코드 리뷰, 수정까지 6단계로 개발 주기를 자동화한다.
+> **디렉토리 목적:** 설계 에이전트(Claude)와 **외부 코딩 에이전트**를 연결하는 AI 협업 개발 파이프라인.
+> 요구사항 정의부터 설계, 코딩 에이전트 구현 지시, 코드 리뷰, 수정까지 6단계로 개발 주기를 자동화한다.
+
+> **일반화 선언 (에이전트 중립):** 이 파이프라인의 구현 주체는 특정 도구에 고정되지 않는다.
+> Cursor Composer, Windsurf, GitHub Copilot Workspace, Codex CLI, Gemini CLI 등
+> **프롬프트/컨텍스트 파일을 받아 코드를 생성하는 어떤 코딩 에이전트와도 조합 가능**하다.
+> 본 문서와 하위 스킬에서 "Cursor"라는 표기는 대표 예시로 읽는다. 핵심 계약은 도구가 아니라
+> 파일이다: 설계 아티팩트(`rd/*.md`) → 컨텍스트 문서(`docs/ai/*.md`) → 자기완결 태스크 프롬프트
+> → 구현 코드 → 리뷰 리포트(`review_report.md`). 이 파일 계약만 지키면 에이전트를 교체하거나
+> UF 그룹별로 서로 다른 에이전트를 병렬 조합해도 파이프라인은 동일하게 동작한다.
 
 ---
 
@@ -355,7 +363,7 @@ cursor-task-formatter → Cursor 구현 → code-reviewer → ...
 
 | 항목 | core-engineering | req_impl_review |
 |------|-----------------|-----------------|
-| 구현 주체 | Claude (`uf-implementor`) | Cursor Composer |
+| 구현 주체 | Claude (`uf-implementor`) | 외부 코딩 에이전트 (Cursor, Windsurf, Copilot, Codex CLI 등) |
 | 브리지 스킬 | 없음 | `repo-doc-writer` + `cursor-task-formatter` |
 | 리뷰 방식 | `uf-chain-validator` | `code-reviewer` + `cursor-task-formatter` |
 | 평가 단계 | `eval-planner` + `eval-runner` | 별도 연계 가능 |

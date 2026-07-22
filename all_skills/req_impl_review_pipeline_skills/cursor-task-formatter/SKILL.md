@@ -1,20 +1,28 @@
 ---
 name: cursor-task-formatter
 description: >
-  Converts UF Block definitions (from uf.md) or code review findings (from code-reviewer)
-  into ready-to-paste Cursor Composer task prompts. Produces structured, self-contained
-  prompts that Cursor can act on without needing additional context. Trigger when the
-  user says "Cursor 프롬프트 만들어줘", "Cursor task 정리해줘", "구현 지시서 써줘",
-  "Cursor에 넘겨줄 내용 만들어줘", "task prompt 생성해줘", "fix prompt 만들어줘",
-  or after uf-designer or code-reviewer has produced output and the user wants to
-  move to the Cursor implementation/fix step. Also trigger when the user has a UF spec
-  or review result and wants to know exactly what to paste into Cursor Composer.
+  Converts UF Block definitions (from rd/uf.md) or code review findings (from code-reviewer)
+  into ready-to-paste task prompts for any external coding agent (Cursor Composer, Windsurf,
+  Copilot Workspace, Codex/Gemini CLI, etc. — "Cursor" is the canonical example). Produces
+  structured, self-contained prompts that any coding agent can act on without additional
+  context. Trigger when the user says "Cursor 프롬프트 만들어줘", "코딩 에이전트 프롬프트
+  만들어줘", "구현 지시서 써줘", "task prompt 생성해줘", "fix prompt 만들어줘", "에이전트에
+  넘겨줄 내용 만들어줘", or after uf-designer or code-reviewer has produced output and the
+  user wants to move to the implementation/fix step with an external coding agent. Also
+  trigger when the user has a UF spec or review result and wants to know exactly what to
+  paste into their coding agent.
 ---
 
-# Cursor-Task-Formatter
+# Cursor-Task-Formatter (coding-agent task formatter)
 
-Takes structured design or review output and produces clean, self-contained Cursor Composer
-prompts — one prompt per task, ready to paste.
+Takes structured design or review output and produces clean, self-contained coding-agent
+prompts — one prompt per task, ready to paste into Cursor Composer, Windsurf, Copilot,
+or any CLI/IDE coding agent.
+
+> **Agent-neutral contract:** prompts must be fully self-contained markdown (spec + I/O
+> contract + edge cases + "Verify by:"), so they work identically regardless of which
+> coding agent consumes them. Different UF groups may even be routed to different agents
+> in parallel. The skill name retains "cursor" for historical compatibility.
 
 > **Read `references/prompt_patterns.md`** for prompt templates and anti-patterns before writing.
 

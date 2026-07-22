@@ -20,10 +20,10 @@ This skill bridges UF-level implementation and system-level validation.
 ---
 
 ## Inputs
-- `if_list.md` — IF Block definitions (required)
-- `if_decomposition.md` — UF dependency graph per IF (required)
+- `rd/if_list.md` — IF Block definitions (required; design artifacts live under `rd/` per GLOBAL_RULES Rule 9 — check `rd/` first, then project root for legacy layouts)
+- `rd/if_decomposition.md` — UF dependency graph per IF (required). **Workflow G:** `rd/theory_tree.md` (theory-decomposer output, same format) is an accepted substitute — coupling edges become the call graph.
 - `src/uf/<module>.py` — implemented UF files (required)
-- `uf_if_coverage_review.md` — coverage matrix for validation reference (recommended)
+- `rd/uf_if_coverage_review.md` — coverage matrix for validation reference (recommended)
 - `reports/impl/uf_impl_report_<timestamp>.md` — implementation status (optional; to skip `STUB`/`BLOCKED` UFs)
 
 ---
@@ -150,6 +150,7 @@ Date: <date>
 2. Every IF acceptance criterion must have a corresponding `assert` in the integration test
 3. If a required UF is `STUB` or `BLOCKED`, the IF module must raise `NotImplementedError` at runtime with a descriptive message — never silently proceed
 4. Data conversion between UFs (e.g., `ndarray → Tensor`) must be explicit and logged as a comment
+5. **Gate G3 (exit gate):** if the integration report contains any `INTERFACE_ERROR` or `PARTIAL` status, evaluation must not start — route to `uf-if-debug-mapper` → `uf-implementor` (fix cycle) instead. State the gate result explicitly at the end of the report: `Gate G3: PASS | BLOCKED (N issues)`.
 
 See `references/reference.md` for integration patterns and test structure templates.
 

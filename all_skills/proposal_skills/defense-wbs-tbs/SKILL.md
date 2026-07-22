@@ -5,6 +5,9 @@ description: >
   MANDATORY TRIGGERS: "WBS 만들어줘", "TBS 만들어줘", "간트차트", "추진 일정", "마일스톤",
   "작업분류체계", "기술분류체계", "일정 계획 표", "연구 일정", "WBS 다이어그램".
   방산 제안서에서 WBS, TBS, 간트차트, 일정 표가 언급되면 이 스킬을 사용할 것.
+  경계: 이 스킬은 WBS/TBS/일정의 "다이어그램·간트·xlsx 시각화" 전담. 3장 본문의 WBS/TBS
+  표 서술은 defense-proposal-tech-analysis, 4장 일정 서술·성과평가는
+  defense-proposal-research-plan 소관 — 시각화 요청이면 이 스킬을 사용.
 ---
 
 # Defense WBS/TBS 스킬

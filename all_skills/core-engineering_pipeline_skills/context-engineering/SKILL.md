@@ -88,11 +88,11 @@ allowed-tools: Read, Write
 ## 핵심 아티팩트 경로 (프로젝트 루트 기준)
 
 ### 설계 문서
-- 요구사항      : `.rd/requirements.md`
-- IF 목록        : `.rd/if_list.md`
-- IF 분해 트리   : `.rd/if_decomposition.md`
-- UF 명세        : `.rd/uf.md`
-- UF 분할 파일   : `.rd/uf_split/uf_ifXX.md`
+- 요구사항      : `rd/requirements.md`
+- IF 목록        : `rd/if_list.md`
+- IF 분해 트리   : `rd/if_decomposition.md`
+- UF 명세        : `rd/uf.md`
+- UF 분할 파일   : `rd/uf_split/uf_ifXX.md`
 
 ### 구현
 - UF 구현        : `./src/uf/`

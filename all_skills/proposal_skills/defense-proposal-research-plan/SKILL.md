@@ -9,6 +9,19 @@ description: >
 
 # Defense Proposal — 연구 계획 스킬
 
+## 전제조건 (Gate G6 — 진입 전 확인)
+
+이 스킬은 사전 분석 산출물을 **파일로** 소비한다 (대화 맥락 의존 금지):
+
+1. `*_proposal_prep_[과제명약어].md` (defense-proposal-prep) — 총기간·단계 구분·추진 전략 로드
+2. `*_kpi_benchmark_[과제명약어].md` (defense-kpi-benchmark) — **성과평가(3항) KPI의 단일 정본**
+3. `[과제명약어]_WBS_TBS.pptx`/`.xlsx` (defense-wbs-tbs)가 있으면 일정·세부과제를 로드
+4. RFP 문서 헤더에 `[SYNTHETIC-RFP]` 태그가 있으면 본 섹션 산출물 헤더에도 동일 태그 승계
+
+파일이 없으면 선행 스킬 실행을 안내한다. 사용자가 "없이 진행"을 명시한 경우에만
+진행하되 산출물 헤더에 `PREREQ-SKIPPED` 기록. 수치는 위 파일 값을 그대로 사용 (재작성 금지).
+**역할 경계**: 일정 서술·성과평가는 이 스킬(4장), 간트차트·일정 시각화는 `defense-wbs-tbs` 담당. 예산 총괄표는 5장(detail-plan) 소관이며 4장에서는 개략 배분만 다룬다.
+
 방산 연구 제안서의 **연구 계획** 섹션(6개 항목)을 작성한다.
 이 섹션은 "언제, 얼마나, 어떻게 수행하고, 성공 여부를 어떻게 판단할 것인가"를 제시한다.
 
@@ -153,7 +166,7 @@ description: >
 
 1. 사용자 검토 승인 (Rule 1)
 2. `[작업폴더]/[과제명약어]_연구계획.pptx` 저장
-3. `YYMMDD_HHMM_research_plan.md` 분석 저장 (Rule 2)
+3. `YYMMDD_HHMM_[과제명약어]_research_plan.md` 분석 저장 (Rule 2)
 4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
 
 ---

@@ -2,7 +2,7 @@
 name: defense-execution-manual
 description: >
   방산 연구 제안서 스킬 수트의 실행 매뉴얼을 자동 생성하는 스킬.
-  연구 주제(과제명)를 입력하면, 9개 스킬(defense-proposal-prep, defense-kpi-benchmark,
+  연구 주제(과제명)를 입력하면, 12개 스킬(defense-rfp-generator, defense-proposal-prep, defense-kpi-benchmark,
   defense-proposal-overview/rd-plan/tech-analysis/research-plan/detail-plan,
   defense-diagram, defense-wbs-tbs)을 어떤 순서로, 어떤 입력값으로 실행해야 하는지
   단계별 실행 매뉴얼 Word 문서(.docx)를 생성한다.
@@ -14,7 +14,7 @@ description: >
 
 # Defense Execution Manual 스킬
 
-연구 주제를 입력받아 **방산 제안서 스킬 수트 9개를 어떻게 실행할지** 알려주는
+연구 주제를 입력받아 **방산 제안서 스킬 수트 12개(STEP 0 rfp-generator ~ STEP 11 project-summarizer)를 어떻게 실행할지** 알려주는
 단계별 실행 매뉴얼 Word 문서(.docx)를 생성한다.
 
 이 스킬은 매뉴얼 생성에 특화되어 있으며, 실제 제안서 콘텐츠를 작성하지는 않는다.
@@ -22,7 +22,7 @@ description: >
 
 > 📖 **참조 파일**:
 > - `references/manual-template.md` — 매뉴얼 docx 구조 및 섹션별 작성 지침
-> - `references/skill-io-map.md` — 9개 스킬의 입출력 스펙 정의
+> - `references/skill-io-map.md` — 12개 스킬의 입출력 스펙 정의
 
 ---
 
@@ -35,7 +35,7 @@ Step 1. 주제 분석 — 기술 도메인, 군 운용 요구, 핵심 기술 키
     ↓
 Step 2. 유사 프로그램 파악 — 웹 검색으로 참조 사례 5~7개 수집
     ↓
-Step 3. 스킬별 입출력 구체화 — 9개 스킬 × 이 주제에 맞는 입력값·샘플 콘텐츠
+Step 3. 스킬별 입출력 구체화 — 12개 스킬 × 이 주제에 맞는 입력값·샘플 콘텐츠
     ↓
 Step 4. KPI 목표치 초안 — 유사 프로그램 기반 8~10개 KPI
     ↓
@@ -87,7 +87,7 @@ RFP 문서가 없는 경우 defense-rfp-generator 스킬로 먼저 RFP를 생성
 
 ## Step 3. 스킬별 입출력 구체화
 
-references/skill-io-map.md를 읽고 9개 스킬 각각에 대해 아래를 작성한다.
+references/skill-io-map.md를 읽고 12개 스킬 각각에 대해 아래를 작성한다.
 
 각 스킬 카드에 포함할 내용:
 1. **스텝 번호 & 스킬명**
@@ -148,7 +148,7 @@ python /mnt/.skills/skills/docx/scripts/office/validate.py [파일경로]
 
 ## 출력 품질 체크리스트
 
-- [ ] 9개 스킬 전부 커버됨
+- [ ] 12개 스킬 전부 커버됨 (STEP 0 rfp-generator, STEP 10 assembler, STEP 11 summarizer 포함)
 - [ ] 각 스킬 INPUT이 이 주제에 맞게 구체화됨 (generic하지 않음)
 - [ ] KPI 표에 해외 SoA 수치 포함
 - [ ] 혁신성 4막 서사 초안 포함

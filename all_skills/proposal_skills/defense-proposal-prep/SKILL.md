@@ -278,12 +278,17 @@ Step 1에서 도출한 평가 배점 표와 연결:
 
 | 분석 결과 | 활용 스킬 | 활용 섹션 |
 |---|---|---|
-| 성능 요구사항 + KPI | `defense-proposal-overview` | 3항 연구 목표 |
+| 성능 요구사항 (KPI **초안**) | `defense-kpi-benchmark` → 확정 후 `defense-proposal-overview` | 3항 연구 목표 |
+| 구성 기술 목록 (기능 도출·TRL 갭에서 추출) | `defense-kpi-benchmark` | SoA 벤치마킹 입력 |
 | 기확보 기술 목록 | `defense-proposal-tech-analysis` | 6항 기확보 기술 |
 | 미확보 기술 목록 | `defense-proposal-tech-analysis` | 7항 미확보 기술 |
 | 기술 벤치마킹 결과 | `defense-proposal-rd-plan` | 1항 국내외 동향 |
 | 혁신 서사 | `defense-proposal-rd-plan` | 4항 혁신성·도전성 |
 | 평가항목 포지셔닝 | 모든 섹션 작성 시 | 강조 포인트 |
+
+> **KPI 단일 소유권**: prep이 만드는 KPI는 초안이다. 최종 KPI 수치의 정본은
+> `defense-kpi-benchmark` 산출표이며, 모든 섹션 스킬은 그 표만 인용한다 (재작성 금지).
+> RFP에 `[SYNTHETIC-RFP]` 태그가 있으면 본 분석 문서 헤더에도 태그를 승계한다.
 
 ---
 

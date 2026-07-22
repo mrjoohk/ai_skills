@@ -1,3 +1,13 @@
+---
+name: travel-planner-html
+description: >
+  여행 계획을 공유 가능한 단일 HTML 파일(탭형 일정 타임라인 + Leaflet.js 지도 +
+  체크리스트)로 생성한다. Trigger: "여행 계획 HTML로 만들어줘", "공유용 여행 계획 파일",
+  "여행 일정 시각화", "지도 포함 여행 플래너", 여행 계획 대화 후 "이거 HTML로 뽑아줘".
+user-invocable: true
+allowed-tools: Read, Write
+---
+
 # travel-planner-html
 
 여행 계획을 **공유 가능한 단일 HTML 파일**로 생성하는 스킬.  

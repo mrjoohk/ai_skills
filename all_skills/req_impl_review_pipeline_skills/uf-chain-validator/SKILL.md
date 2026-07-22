@@ -18,9 +18,13 @@ not whether every UF has a standalone test.
 - When coverage or evidence gates fail in CI
 - After `uf-designer` completes, to confirm ownership is declared before implementation
 
+> **경계**: Claude가 구현한 코드(uf-implementor 경로)의 체인·증적 검증은 이 스킬,
+> 외부 코딩 에이전트가 구현한 코드의 계약·품질 리뷰는 `code-reviewer`(req_impl 파이프라인) 소관.
+> 두 파이프라인이 섞인 프로젝트에서는 둘 다 실행할 수 있다 (관점이 다름: 3-Gate vs 3-렌즈).
+
 ## Inputs
-- Path(s) to UF definition files (e.g., `uf.md`, `uf_split/uf_if*.md`)
-- `if_list.md` — used to verify IF-level acceptance test references
+- Path(s) to UF definition files (e.g., `rd/uf.md`, `rd/uf_split/uf_if*.md` — design artifacts live under `rd/` per GLOBAL_RULES Rule 9; check `rd/` first, then project root for legacy layouts)
+- `rd/if_list.md` — used to verify IF-level acceptance test references
 - Project source paths (e.g., `src/`)
 - Test paths (e.g., `tests/`)
 - Evidence pack root (e.g., `evidence_pack/`)

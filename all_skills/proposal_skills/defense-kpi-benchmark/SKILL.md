@@ -7,6 +7,9 @@ description: >
   "벤치마크 조사", "국내외 성능 비교", "정량 목표 근거", "목표 수치 어떻게 정해",
   "기술 수준 조사", "SoA 조사", "state-of-the-art 조사".
   성능 목표치나 KPI 설정이 언급되면 반드시 이 스킬을 사용할 것.
+  경계: 이 스킬은 "제안서 KPI·SoA 벤치마킹" 전용. 엔지니어링 실행 단계의 평가 지표·
+  데이터셋·임계값 설계(evaluation_plan.md)는 eval-planner 소관. 이 스킬의 KPI 산출표는
+  모든 제안서 섹션 스킬이 인용하는 단일 정본이다.
 ---
 
 # Defense KPI Benchmark 스킬

@@ -9,6 +9,19 @@ description: >
 
 # Defense Proposal — 기술 현황 분석 스킬
 
+## 전제조건 (Gate G6 — 진입 전 확인)
+
+이 스킬은 사전 분석 산출물을 **파일로** 소비한다 (대화 맥락 의존 금지):
+
+1. `*_proposal_prep_[과제명약어].md` (defense-proposal-prep) — 기확보/미확보 기술 목록(6·7항)·TRL 갭 로드
+2. `*_kpi_benchmark_[과제명약어].md` (defense-kpi-benchmark) — **KPI 수치의 단일 정본**
+3. 과제 개요 산출물이 있으면 대상 체계·범위를 로드 (없어도 prep 파일로 진행 가능)
+4. RFP 문서 헤더에 `[SYNTHETIC-RFP]` 태그가 있으면 본 섹션 산출물 헤더에도 동일 태그 승계
+
+파일이 없으면 선행 스킬 실행을 안내한다. 사용자가 "없이 진행"을 명시한 경우에만
+진행하되 산출물 헤더에 `PREREQ-SKIPPED` 기록. 수치는 위 파일 값을 그대로 사용 (재작성 금지).
+**역할 경계**: WBS/TBS의 표 서술은 이 스킬(3장), 다이어그램·간트·xlsx 시각화는 `defense-wbs-tbs` 담당.
+
 방산 연구 제안서의 **기술 현황 분석** 섹션(7개 항목)을 작성한다.
 이 섹션은 "우리가 어떤 기술을 가지고 있고, 무엇을 개발해야 하며, 어떻게 개발할 것인가"를 체계적으로 보여준다.
 
@@ -174,7 +187,7 @@ defense-diagram 스킬로 (E) 기술 비교도 유형 사용.
 
 1. 사용자 검토 승인 (Rule 1)
 2. `[작업폴더]/[과제명약어]_기술현황분석.pptx` 저장
-3. `YYMMDD_HHMM_tech_analysis.md` 분석 저장 (Rule 2)
+3. `YYMMDD_HHMM_[과제명약어]_tech_analysis.md` 분석 저장 (Rule 2)
 4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
 
 ---

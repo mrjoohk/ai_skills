@@ -17,6 +17,15 @@ cp -r .claude/ <your-project>/
 cp GLOBAL_RULES.md <your-project>/
 ```
 
+**Canonical source & sync:** `all_skills/`가 모든 스킬의 **정본**이며 `.claude/skills/`는 설치본이다.
+스킬 수정은 항상 `all_skills/`에서 하고, 아래 스크립트로 드리프트 검사·동기화한다
+(공용 스킬의 폴더 간 사본도 함께 검사; `context-engineering`은 파이프라인별 의도적 분기로 제외):
+
+```bash
+python scripts/check_skill_sync.py          # 검사만
+python scripts/check_skill_sync.py --apply  # 정본 → 사본/설치본 동기화
+```
+
 Invoke any skill using a slash command in your Claude session:
 
 ```
@@ -34,6 +43,7 @@ Invoke any skill using a slash command in your Claude session:
 | Skill | Role | Key Outputs |
 |---|---|---|
 | [`core-engineering`](.claude/skills/core-engineering/) | 8-stage design process from problem to verified UF blocks | `requirements.md`, `if_list.md`, `if_decomposition.md`, `uf.md`, `uf_if_coverage_review.md`, `verification_plan.md` |
+| [`theory-decomposer`](all_skills/core-engineering_pipeline_skills/theory-decomposer/) | Theory-level front-end: source availability check (T0) → recursive decomposition with stop criteria (S1–S4, `max_depth`) → EQ Blocks → merge-readiness gate | `rd/source_survey.md`, `rd/theory_statement.md`, `rd/theory_tree.md`, `rd/eq.md`, `rd/eq_coverage_review.md` |
 
 **8-Stage Design Process:**
 ```
@@ -81,7 +91,8 @@ uf-if-debug-mapper  →  uf-chain-validator  →  uf-implementor (fix)
 
 | Skill | Role | Key Outputs |
 |---|---|---|
-| [`eval-planner`](.claude/skills/eval-planner/) | Selects domain-appropriate metrics and sets Baseline/Target/Stretch thresholds | `evaluation_plan.md` |
+| [`eval-planner`](.claude/skills/eval-planner/) | Selects domain-appropriate metrics and sets Baseline/Target/Stretch thresholds | `rd/evaluation_plan.md` |
+| [`exp-runner`](all_skills/core-engineering_pipeline_skills/exp-runner/) | Executes the evaluation plan: fixes seeds/env, runs experiments, records provenance | `evidence_pack/runs.yaml`, `evidence_pack/env.yaml`, `results/<exp_id>/` |
 | [`eval-runner`](.claude/skills/eval-runner/) | Generates metric calculation scripts and comparison reports from experiment results | `scripts/eval/*.py`, `reports/eval/*.md`, `evidence_pack/metrics.yaml` |
 
 **Supported domains:** ML/DL classification & regression, Audio/Speech (SI-SDR, PESQ, WER, DER), NLP (BLEU, BERTScore, ROUGE-L)
@@ -130,12 +141,17 @@ These auditors connect to `eval-planner` by enriching it with domain-specific me
 | `if_decomposition.md` | `core-engineering` | `if-integrator`, `uf-if-debug-mapper` |
 | `uf.md` | `core-engineering` | `uf-implementor`, `uf-chain-validator`, `eval-planner` |
 | `uf_if_coverage_review.md` | `core-engineering` (Stage 7.5) | `uf-implementor` (gate check) |
-| `evaluation_plan.md` | `eval-planner` | `eval-runner` |
+| `rd/evaluation_plan.md` | `eval-planner` | `exp-runner`, `eval-runner` |
+| `evidence_pack/runs.yaml`, `env.yaml` | `exp-runner` | `eval-runner`, `ci-evidence-automation` |
+| `rd/domain_metrics.md` | `gpu-hpc-guard`, `sim-physics-auditor`, `rag-data-quality` | `eval-planner` |
 | `evidence_pack/metrics.yaml` | `eval-runner` | `ci-evidence-automation` |
 | `src/uf/*.py` | `uf-implementor` | `if-integrator`, `uf-chain-validator` |
 | `src/if/*.py` | `if-integrator` | `eval-runner`, `ci-evidence-automation` |
 | `agents/orchestration_plan.md` | `agent-orchestration` | `agent-executor` |
-| `debug_map.md` | `uf-if-debug-mapper` | `uf-chain-validator`, `uf-implementor` |
+| `docs/uf_if_debug_map.md` | `uf-if-debug-mapper` | `uf-chain-validator`, `uf-implementor` |
+| `rd/eq.md` | `theory-decomposer` | `uf-implementor` (uf.md-compatible EQ Blocks) |
+| `rd/theory_tree.md` | `theory-decomposer` | `if-integrator` (if_decomposition.md-compatible) |
+| `rd/source_survey.md` | `theory-decomposer` (T0) | `eval-planner`, `eval-runner` (verification oracle) |
 
 ---
 
@@ -195,11 +211,12 @@ Each skill folder contains:
 
 | Workflow | Skills Used | Start Condition |
 |---|---|---|
-| **A. Full Design-to-Code** | `core-engineering` → `eval-planner` → `uf-implementor` → `if-integrator` → `eval-runner` → `ci-evidence-automation` | Problem statement only |
+| **A. Full Design-to-Code** | `core-engineering` → `eval-planner` → `uf-implementor` → `if-integrator` → `exp-runner` → `eval-runner` → `ci-evidence-automation` | Problem statement only |
 | **B. Debug Failing Integration** | `uf-if-debug-mapper` → `uf-chain-validator` → `uf-implementor` → `eval-runner` | Failing test + existing design docs |
 | **C. Multi-Agent Parallel Design** | `core-engineering` → `agent-orchestration` → `agent-executor` | Large system with parallel IF groups |
 | **D. GPU/HPC Audit** | `core-engineering` → `gpu-hpc-guard` → `eval-planner` → `eval-runner` | Compute-intensive workload |
 | **E. RAG Development** | `core-engineering` → `rag-data-quality` → `eval-planner` → `eval-runner` → `ci-evidence-automation` | RAG system + corpus |
 | **F. Physics Simulation** | `sim-physics-auditor` → `eval-planner` → `eval-runner` | Simulation codebase |
+| **G. Theory-to-Dynamics Reconstruction** | `theory-decomposer` → `uf-implementor` → `if-integrator` → `sim-physics-auditor` → `eval-planner` → `eval-runner` | Theory/phenomenon description only (T0 verdict routes verification) |
 
 See [`Skill_Combination_Usage_Guide.md`](./Skill_Combination_Usage_Guide.md) for step-by-step slash command sequences for each workflow.

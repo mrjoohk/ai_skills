@@ -1,14 +1,17 @@
 ---
 name: repo-doc-writer
 description: >
-  Converts core-engineering design artifacts (requirements.md, if_list.md, if_decomposition.md,
-  uf.md) into structured /docs/ai/*.md files that Cursor Composer can use as implementation
-  context. This is the bridge between Claude's design phase and Cursor's implementation phase.
-  Trigger when the user says "docs 써줘", "Cursor용 문서 만들어줘", "repo에 문서 저장해줘",
-  "/docs/ai 업데이트", "설계 문서 레포에 반영해줘", "task 문서 만들어줘", or after
-  req-elicitor / if-designer / uf-designer has produced artifacts and the user wants
-  to prepare the repo for Cursor to start coding. Also trigger when the user mentions
-  "docs/ai" or wants to sync design artifacts into the repository.
+  Converts core-engineering design artifacts (rd/requirements.md, rd/if_list.md,
+  rd/if_decomposition.md, rd/uf.md) into structured /docs/ai/*.md files that any external
+  coding agent (Cursor Composer, Windsurf, Copilot Workspace, Codex/Gemini CLI, etc.) can
+  use as implementation context. This is the bridge between Claude's design phase and the
+  coding agent's implementation phase — agent-neutral by design; "Cursor" is the canonical
+  example. Trigger when the user says "docs 써줘", "Cursor용 문서 만들어줘", "코딩 에이전트용
+  문서 만들어줘", "repo에 문서 저장해줘", "/docs/ai 업데이트", "설계 문서 레포에 반영해줘",
+  "task 문서 만들어줘", or after req-elicitor / if-designer / uf-designer has produced
+  artifacts and the user wants to prepare the repo for a coding agent to start coding.
+  Also trigger when the user mentions "docs/ai" or wants to sync design artifacts into
+  the repository.
 ---
 
 # Repo-Doc-Writer
@@ -49,7 +52,8 @@ If any source artifact is missing, note the gap and write partial docs from what
 
 ### Step 1 — Scan available artifacts
 
-Look for these files in the project (check current dir and common subdirs like `docs/`, `design/`):
+Look for these files in the project — **scan `rd/` first** (GLOBAL_RULES Rule 9 canonical
+location), then current dir and common subdirs like `docs/`, `design/` for legacy layouts:
 - `requirements.md`
 - `if_list.md`
 - `if_decomposition.md`

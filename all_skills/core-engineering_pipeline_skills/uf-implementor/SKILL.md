@@ -20,9 +20,14 @@ This skill bridges the design phase and the coding phase.
 ---
 
 ## Inputs
-- `uf.md` — UF Block definitions (required)
-- `uf_if_coverage_review.md` — coverage review result (recommended; skip if unavailable)
-- `requirements.md` — for cross-referencing non-functional constraints (optional)
+- `rd/uf.md` — UF Block definitions (required; design artifacts live under `rd/` per GLOBAL_RULES Rule 9 — check `rd/` first, then project root for legacy layouts)
+- `rd/uf_if_coverage_review.md` — coverage review result (**required — Gate G2**)
+- `rd/requirements.md` — for cross-referencing non-functional constraints (optional)
+
+**Gate G2 (entry gate):**
+- If `uf_if_coverage_review.md` is missing → **BLOCKED**: run `uf-designer` Phase C (or `uf-chain-validator`) first. Do not implement from `uf.md` alone.
+- If the review contains any `UNCOVERED` → **BLOCKED**: resolve coverage gaps before implementation.
+- The user may explicitly override with "게이트 무시하고 진행" — then record `GATE-G2: OVERRIDDEN by user` in the implementation report header.
 
 ---
 
