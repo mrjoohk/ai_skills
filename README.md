@@ -78,7 +78,8 @@ Invoke any skill using a slash command in your Claude session:
 | Skill | Role | Key Outputs |
 |---|---|---|
 | [`uf-chain-validator`](.claude/skills/uf-chain-validator/) | Validates UF-chain I/O contracts, test coverage, and evidence linkage | Chain validation report |
-| [`uf-if-debug-mapper`](.claude/skills/uf-if-debug-mapper/) | Maps failure symptoms to root cause UF/IF code locations | `debug_map.md` with ranked hypotheses |
+| [`uf-if-debug-mapper`](.claude/skills/uf-if-debug-mapper/) | Maps failure symptoms to root cause UF/IF code locations | `docs/uf_if_debug_map.md` with ranked hypotheses |
+| [`fresh-eyes-auditor`](all_skills/core-engineering_pipeline_skills/fresh-eyes-auditor/) | Spawns a context-free agent to audit for ambiguity/forced-logic/errors/hallucination, then triages findings by citation check (advisory) | `review_docs/*_fresh_eyes_audit.md` |
 
 **Typical debug flow:**
 ```

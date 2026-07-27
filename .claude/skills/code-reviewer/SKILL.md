@@ -2,9 +2,11 @@
 name: code-reviewer
 description: >
   Performs structured code review against UF/IF contracts, requirements, and coding standards.
-  Produces a prioritized finding report that cursor-task-formatter can turn into Cursor fix prompts.
+  Produces a prioritized finding report that cursor-task-formatter can turn into fix prompts
+  for any external coding agent. Implementation-agent-agnostic: reviews code the same way
+  whether it was written by Cursor, Windsurf, Copilot, another agent, or a human.
   Trigger when the user says "코드 리뷰해줘", "리뷰 해줘", "구현 검토해줘", "코드 확인해줘",
-  "review this code", "PR 리뷰", "버그 찾아줘", "개선점 찾아줘", or after Cursor has
+  "review this code", "PR 리뷰", "버그 찾아줘", "개선점 찾아줘", or after a coding agent has
   finished implementing UFs and the user wants to validate the result before merging.
   Also trigger when the user shares code files and asks for quality, correctness, or
   contract compliance checks. Do NOT wait for the user to say "code review" specifically
@@ -15,6 +17,10 @@ description: >
 
 Reviews code against three lenses: contract compliance, logic correctness, and code quality.
 Outputs a structured finding report that feeds directly into `cursor-task-formatter`.
+
+> **경계**: 외부 코딩 에이전트 구현물의 계약·품질 리뷰는 이 스킬, Claude 구현물
+> (uf-implementor 경로)의 체인 무결성·증적 검증은 `uf-chain-validator` 소관.
+> 관점이 다르므로(3-렌즈 vs 3-Gate) 혼합 프로젝트에서는 병행 가능.
 
 > **Read `references/review_criteria.md`** for the full checklist before reviewing.
 
@@ -31,8 +37,12 @@ Outputs a structured finding report that feeds directly into `cursor-task-format
 
 ## Input
 
-- **Code files** — the implementation to review (required)
-- **UF specs / task docs** — `docs/ai/tasks/*.md` or `uf.md` (use as contract reference if available)
+- **Code files** — the implementation to review (required; which agent wrote it is irrelevant)
+- **UF specs / task docs** — `docs/ai/tasks/*.md` or `rd/uf.md` (check `rd/` first per GLOBAL_RULES Rule 9, then project root; use as contract reference if available — if neither is found, say so explicitly in the report header: contract lenses were skipped)
+
+**Output filename (fixed contract):** save the finding report as `review_report.md`
+(project root or `reports/review/`) — `cursor-task-formatter` Mode B consumes exactly
+this file.
 - **requirements.md** — for acceptance criteria cross-check (optional)
 
 If no spec is provided, review against general best practices and note that contract compliance

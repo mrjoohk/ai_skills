@@ -40,6 +40,22 @@ Ensures quality and evaluability of RAG corpus:
 
 ---
 
+## Pipeline Insertion & Input Source (canonical)
+- **When (single rule):** after the corpus/index exists and **before `eval-planner` (Stage 8)**; re-run on ingest, chunking, or embedding-model changes. (This supersedes conflicting timings in older manuals.)
+- **Input source:** corpus path and chunking configuration from project config files where present; the evaluation set (Q/A + citations) must come from the user or `rd/requirements.md` acceptance criteria — never synthesize it silently.
+
+## Downstream Handoff — eval wiring
+Append audit-derived metrics and thresholds to **`rd/domain_metrics.md`** (create if missing):
+
+```
+| Metric | Direction | Baseline | Target | Unit | Rationale | Auditor |
+|---|---|---|---|---|---|---|
+| recall_at_k | ↑ | <measured> | ≥ <target> | — | coverage gap REQ-## | rag-data-quality |
+| dup_rate | ↓ | <measured> | ≤ <target> | % | index bloat guard | rag-data-quality |
+```
+
+`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/rag/` (GLOBAL_RULES Rule 10).
+
 ## MCP Integration
 - `mcp.filesystem`: scan corpus and metadata
 - `mcp.shell`: run evaluation scripts, calculate Recall@k, generate reports

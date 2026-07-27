@@ -42,6 +42,22 @@ Audits physics simulation consistency and numerical accuracy:
 
 ---
 
+## Pipeline Insertion & Input Source (canonical)
+- **When (single rule):** after `rd/uf.md` (or `rd/eq.md` from theory-decomposer) exists and **before `eval-planner` (Stage 8)**; always re-run after parameter/porting changes. (This supersedes conflicting timings in older manuals.)
+- **Input source:** equations and assumptions from `rd/eq.md` EQ Blocks (`Equation`, `Assumptions`, `Validity Domain` fields) or `rd/uf.md` `Algorithm Summary`; parameter ranges from `rd/assumptions_and_constraints.md`; ask the user only for what these files do not carry.
+
+## Downstream Handoff — eval wiring
+Append audit-derived metrics and thresholds to **`rd/domain_metrics.md`** (create if missing):
+
+```
+| Metric | Direction | Baseline | Target | Unit | Rationale | Auditor |
+|---|---|---|---|---|---|---|
+| energy_drift | ↓ | <measured> | ≤ <tol> | %/s | conservation check EQ-## | sim-physics-auditor |
+| timestep_margin | ↑ | <computed> | ≥ 2× | — | Nyquist/stability | sim-physics-auditor |
+```
+
+`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/physics/` (GLOBAL_RULES Rule 10).
+
 ## MCP Integration
 - `mcp.shell`: run parameter sweeps, generate plots, calculate metrics
 - `mcp.filesystem`: store sweep configuration and results in `reports/physics/`

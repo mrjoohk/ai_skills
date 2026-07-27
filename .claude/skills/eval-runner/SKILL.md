@@ -22,9 +22,13 @@ This is the execution part of Stage 8, continuing from the output of `eval-plann
 ---
 
 ## Inputs
-- `evaluation_plan.md` (output from eval-planner) — or provide metric names + thresholds directly
-- Experiment result data: file paths, arrays, or numeric values entered directly
+- `rd/evaluation_plan.md` (output from eval-planner; check `rd/` first, then project root) — or provide metric names + thresholds directly
+- Experiment result data: `evidence_pack/runs.yaml` + `results/<exp_id>/` (produced by `exp-runner`), or file paths / arrays / numeric values entered directly
 - List of experiments to compare (optional: for multi-experiment comparison)
+
+**Entry gates:**
+- **Gate G3 (integration):** if `reports/impl/if_integration_report_*.md` exists and its latest entry shows `INTERFACE_ERROR` or `PARTIAL`, stop — evaluation on a partially integrated system produces misleading evidence. Route to `uf-if-debug-mapper` first (user may override; record the override in the report).
+- **Unplanned-run flag:** when running without `evaluation_plan.md`, the report header MUST carry `Mode: UNPLANNED (no evaluation_plan)` and its results MUST NOT be promoted into `evidence_pack/metrics.yaml` without user confirmation.
 
 ---
 

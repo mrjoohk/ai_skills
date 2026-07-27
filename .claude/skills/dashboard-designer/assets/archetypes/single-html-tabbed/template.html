@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!--
+  Archetype: sidebar+main+tabs
+  Use for: training-metric dashboards, experiment trackers, anything where the
+  user picks one entity (run / model / experiment) and views many facets of it.
+
+  How to customize this template:
+    1. Replace the sample runs in SAMPLE_DATA with your real runs list.
+    2. Point loadRunMetrics() at your data source (file / API / polling).
+    3. Fill in the tab list below and add/remove tab panels as needed.
+    4. If embedding TensorBoard/MLflow, update the iframe src.
+    5. Swap {{PROJECT_NAME}} in the title bar.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{PROJECT_NAME}} — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1216;
+    --bg-panel: #171b22;
+    --bg-hover: #1e242d;
+    --border: #252b35;
+    --fg: #e6e8eb;
+    --fg-dim: #8b95a3;
+    --accent: #5aa7ff;
+    --accent-2: #ff7a7a;
+    --ok: #5fd68b;
+    --warn: #ffc857;
+    --err: #ff6b6b;
+    --radius: 6px;
+    --pad: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 44px 1fr;
+    grid-template-areas: "brand header" "sidebar main";
+  }
+  /* Brand cell (top-left) */
+  .brand {
+    grid-area: brand;
+    padding: 0 var(--pad);
+    display: flex; align-items: center;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600; letter-spacing: .2px;
+  }
+  .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ok); margin-right: 8px;
+    box-shadow: 0 0 0 3px rgba(95,214,139,.15);
+  }
+  /* Header cell (top-right) */
+  header {
+    grid-area: header;
+    padding: 0 var(--pad);
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+  header .tabs { display: flex; gap: 2px; }
+  header .tab {
+    padding: 6px 12px; cursor: pointer; border-radius: var(--radius);
+    color: var(--fg-dim); user-select: none;
+  }
+  header .tab:hover { background: var(--bg-hover); color: var(--fg); }
+  header .tab.active { background: var(--bg); color: var(--fg); border: 1px solid var(--border); }
+  header .meta { color: var(--fg-dim); font-size: 12px; }
+  /* Sidebar (left) */
+  aside {
+    grid-area: sidebar;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--bg-panel);
+  }
+  aside .filter {
+    padding: 8px; border-bottom: 1px solid var(--border);
+  }
+  aside .filter input {
+    width: 100%; padding: 6px 8px;
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font: inherit;
+  }
+  aside ul { list-style: none; margin: 0; padding: 4px; }
+  aside li {
+    padding: 6px 8px; border-radius: var(--radius); cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+  }
+  aside li:hover { background: var(--bg-hover); }
+  aside li.selected { background: rgba(90,167,255,0.12); color: var(--accent); }
+  aside li .swatch {
+    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+  }
+  /* Main (right) */
+  main {
+    grid-area: main;
+    overflow: auto;
+    padding: var(--pad);
+  }
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--pad);
+    margin-bottom: var(--pad);
+  }
+  .panel h3 { margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: var(--fg-dim); text-transform: uppercase; letter-spacing: .5px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .chart-wrap { height: 300px; position: relative; }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; font-size: 12px; }
+  .kv dt { color: var(--fg-dim); }
+  .kv dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  pre.log {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px; margin: 0; overflow: auto; max-height: 360px;
+    font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  pre.log .ts { color: var(--fg-dim); }
+  pre.log .lvl-info { color: var(--accent); }
+  pre.log .lvl-warn { color: var(--warn); }
+  pre.log .lvl-err { color: var(--err); }
+  iframe.embed {
+    width: 100%; height: calc(100vh - 120px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: white;
+  }
+  .empty {
+    padding: 40px; text-align: center; color: var(--fg-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="brand"><span class="dot"></span>{{PROJECT_NAME}}</div>
+
+<header>
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="metrics">Metrics</div>
+    <div class="tab" data-tab="logs">Logs</div>
+    <div class="tab" data-tab="config">Config</div>
+    <div class="tab" data-tab="tensorboard">TensorBoard</div>
+  </div>
+  <div class="meta" id="lastUpdated">last updated: —</div>
+</header>
+
+<aside>
+  <div class="filter">
+    <input id="runFilter" placeholder="Filter runs…" />
+  </div>
+  <ul id="runList"></ul>
+</aside>
+
+<main>
+
+  <!-- TAB: Metrics -->
+  <div class="tab-panel active" data-tab-panel="metrics">
+    <div class="panel">
+      <h3>Loss</h3>
+      <div class="chart-wrap"><canvas id="lossChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Accuracy</h3>
+      <div class="chart-wrap"><canvas id="accChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TAB: Logs -->
+  <div class="tab-panel" data-tab-panel="logs">
+    <div class="panel">
+      <h3>Training log</h3>
+      <pre class="log" id="logStream"></pre>
+    </div>
+  </div>
+
+  <!-- TAB: Config -->
+  <div class="tab-panel" data-tab-panel="config">
+    <div class="panel">
+      <h3>Run config</h3>
+      <dl class="kv" id="configKV"></dl>
+    </div>
+  </div>
+
+  <!-- TAB: TensorBoard -->
+  <div class="tab-panel" data-tab-panel="tensorboard">
+    <div class="panel">
+      <h3>TensorBoard</h3>
+      <!-- TODO: start TensorBoard (see the hint strip below for the exact command).
+           If the iframe stays blank, TensorBoard is likely sending
+           X-Frame-Options: SAMEORIGIN. Either put it behind a reverse proxy
+           that strips the header, or open in a new tab via the link below. -->
+      <iframe class="embed" src="http://localhost:6006" title="TensorBoard"></iframe>
+      <p style="margin-top:8px; color:var(--fg-dim);">
+        Start with: <code>tensorboard &#45;&#45;logdir=&lt;path&gt; &#45;&#45;port=6006 &#45;&#45;bind_all</code>.
+        Can't see it? <a href="http://localhost:6006" target="_blank" style="color:var(--accent);">open in new tab ↗</a>
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ---------- SAMPLE DATA — replace with your real source ----------
+   TODO: swap SAMPLE_DATA with a fetch() call to your metrics source.
+   Expected shape per run:
+     {
+       id: string, name: string, color: string,
+       metrics: { step: number, loss: number, acc: number }[],
+       logs:    { ts: string, level: "info"|"warn"|"error", msg: string }[],
+       config:  Record<string, string|number|boolean>
+     }
+   ------------------------------------------------------------------ */
+const SAMPLE_DATA = [
+  {
+    id: "run-001", name: "baseline-lr1e-3", color: "#5aa7ff",
+    metrics: Array.from({length: 50}, (_, i) => ({
+      step: i*100, loss: 2.5 * Math.exp(-i/20) + 0.1 + Math.random()*0.05,
+      acc: 1 - Math.exp(-i/15) * (0.9 + Math.random()*0.1)
+    })),
+    logs: [
+      {ts:"12:01:02", level:"info", msg:"training started"},
+      {ts:"12:05:11", level:"info", msg:"epoch 1 done, val_loss=1.23"},
+      {ts:"12:09:44", level:"warn", msg:"LR scheduler kicked in"},
+    ],
+    config: { lr: 1e-3, batch: 64, optimizer: "adam", seed: 42 }
+  },
+  {
+    id: "run-002", name: "higher-lr-3e-3", color: "#ff7a7a",
+    metrics: Array.from({length: 50}, (_, i) => ({
+      step: i*100, loss: 2.5 * Math.exp(-i/12) + 0.2 + Math.random()*0.1,
+      acc: 1 - Math.exp(-i/10) * (0.85 + Math.random()*0.15)
+    })),
+    logs: [
+      {ts:"12:00:55", level:"info", msg:"training started"},
+      {ts:"12:03:22", level:"err",  msg:"NaN loss at step 800, recovered"},
+    ],
+    config: { lr: 3e-3, batch: 64, optimizer: "adam", seed: 42 }
+  },
+];
+
+/* ---------- Sidebar (run list) ---------- */
+const runListEl = document.getElementById("runList");
+const runFilterEl = document.getElementById("runFilter");
+let selectedRunId = SAMPLE_DATA[0].id;
+
+function renderRunList() {
+  const q = runFilterEl.value.trim().toLowerCase();
+  runListEl.innerHTML = "";
+  for (const r of SAMPLE_DATA) {
+    if (q && !r.name.toLowerCase().includes(q)) continue;
+    const li = document.createElement("li");
+    if (r.id === selectedRunId) li.classList.add("selected");
+    li.innerHTML = `<span class="swatch" style="background:${r.color}"></span>${r.name}`;
+    li.onclick = () => { selectedRunId = r.id; renderRunList(); renderAll(); };
+    runListEl.appendChild(li);
+  }
+}
+runFilterEl.oninput = renderRunList;
+
+/* ---------- Tabs ---------- */
+document.getElementById("tabs").addEventListener("click", e => {
+  const t = e.target.closest(".tab"); if (!t) return;
+  document.querySelectorAll("#tabs .tab").forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  const key = t.dataset.tab;
+  document.querySelectorAll("[data-tab-panel]").forEach(p => {
+    p.classList.toggle("active", p.dataset.tabPanel === key);
+  });
+});
+
+/* ---------- Charts ---------- */
+Chart.defaults.color = "#8b95a3";
+Chart.defaults.borderColor = "#252b35";
+let lossChart, accChart;
+
+function makeChart(canvasId, label) {
+  return new Chart(document.getElementById(canvasId), {
+    type: "line",
+    data: { datasets: [] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      parsing: false,
+      scales: {
+        x: { type: "linear", title: { display: true, text: "step" } },
+        y: { title: { display: true, text: label } }
+      },
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
+}
+
+function renderCharts() {
+  const run = SAMPLE_DATA.find(r => r.id === selectedRunId);
+  if (!run) return;
+  const loss = run.metrics.map(m => ({x: m.step, y: m.loss}));
+  const acc  = run.metrics.map(m => ({x: m.step, y: m.acc}));
+  lossChart.data.datasets = [{ label: run.name, data: loss, borderColor: run.color, backgroundColor: run.color+"33", pointRadius: 0, tension: 0.2 }];
+  accChart.data.datasets  = [{ label: run.name, data: acc,  borderColor: run.color, backgroundColor: run.color+"33", pointRadius: 0, tension: 0.2 }];
+  lossChart.update(); accChart.update();
+}
+
+/* ---------- Logs ---------- */
+function renderLogs() {
+  const run = SAMPLE_DATA.find(r => r.id === selectedRunId);
+  if (!run) return;
+  const el = document.getElementById("logStream");
+  el.innerHTML = run.logs.map(l =>
+    `<span class="ts">[${l.ts}]</span> <span class="lvl-${l.level}">${l.level.toUpperCase()}</span> ${l.msg}`
+  ).join("\n");
+}
+
+/* ---------- Config ---------- */
+function renderConfig() {
+  const run = SAMPLE_DATA.find(r => r.id === selectedRunId);
+  if (!run) return;
+  const el = document.getElementById("configKV");
+  el.innerHTML = Object.entries(run.config).map(([k,v]) =>
+    `<dt>${k}</dt><dd>${v}</dd>`
+  ).join("");
+}
+
+/* ---------- Render orchestrator ---------- */
+function renderAll() {
+  renderCharts();
+  renderLogs();
+  renderConfig();
+  document.getElementById("lastUpdated").textContent =
+    "last updated: " + new Date().toLocaleTimeString();
+}
+
+/* ---------- Bootstrap ---------- */
+window.addEventListener("load", () => {
+  lossChart = makeChart("lossChart", "loss");
+  accChart  = makeChart("accChart",  "accuracy");
+  renderRunList();
+  renderAll();
+});
+</script>
+</body>
+</html>

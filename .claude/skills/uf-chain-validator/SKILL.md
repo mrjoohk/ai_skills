@@ -18,9 +18,13 @@ not whether every UF has a standalone test.
 - When coverage or evidence gates fail in CI
 - After `uf-designer` completes, to confirm ownership is declared before implementation
 
+> **경계**: Claude가 구현한 코드(uf-implementor 경로)의 체인·증적 검증은 이 스킬,
+> 외부 코딩 에이전트가 구현한 코드의 계약·품질 리뷰는 `code-reviewer`(req_impl 파이프라인) 소관.
+> 두 파이프라인이 섞인 프로젝트에서는 둘 다 실행할 수 있다 (관점이 다름: 3-Gate vs 3-렌즈).
+
 ## Inputs
-- Path(s) to UF definition files (e.g., `uf.md`, `uf_split/uf_if*.md`)
-- `if_list.md` — used to verify IF-level acceptance test references
+- Path(s) to UF definition files (e.g., `rd/uf.md`, `rd/uf_split/uf_if*.md` — design artifacts live under `rd/` per GLOBAL_RULES Rule 9; check `rd/` first, then project root for legacy layouts)
+- `rd/if_list.md` — used to verify IF-level acceptance test references
 - Project source paths (e.g., `src/`)
 - Test paths (e.g., `tests/`)
 - Evidence pack root (e.g., `evidence_pack/`)
@@ -78,6 +82,12 @@ that the referenced test artifacts exist (or are explicitly deferred).
 **WARN conditions:**
 - `UF-local` coverage target below 90% without justification
 - Guard-rail tests for `guard-rail+chain` UFs are absent (type/sentinel checks missing)
+- **Beyonce Rule 위반:** 기존 UF를 수정했는데 해당 UF의 테스트 커버리지가 이전보다 줄어든 경우. 동작을 바꾸면 테스트도 함께 갱신해야 한다.
+
+**테스트 품질 체크 (WARN — 발견 시 보고):**
+- 테스트명이 `test_case1`, `test_func` 등 동작을 설명하지 않는 경우 → `test_uf_XX_<동작>_<조건>` 형식 권장
+- 테스트가 UF 내부 구현 방식(특정 함수 호출 여부)을 검증하고 있는 경우 → 입력/출력(상태)만 검증하도록 수정 권장
+- 단일 테스트 함수에 여러 개념이 혼합된 경우 → 개념당 1개 테스트로 분리 권장
 
 > **Do NOT fail** a `guard-rail+chain` or `IF-acceptance` UF solely because it lacks
 > a standalone functional test. That is the intended design.

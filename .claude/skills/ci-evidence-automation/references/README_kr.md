@@ -62,8 +62,8 @@ Webhook 알림을 트리거하는 CI 단계를 추가하라."
 - **agent-orchestration**: CI 파이프라인 구성 및 실행 시 에이전트 역할 분담
 
 ### 전형적인 플로우
-1. core-engineering: Stage 1~8을 통해 requirements.md, uf.md, verification_plan.md 생성
-2. ci-evidence-automation: verification_plan.md를 기반으로 evidence_pack 스키마 및 CI 워크플로 생성
+1. core-engineering: Stage 1~8을 통해 requirements.md, uf.md, evaluation_plan.md 생성
+2. ci-evidence-automation: evaluation_plan.md를 기반으로 evidence_pack 스키마 및 CI 워크플로 생성
 3. 각 CI 실행 시 자동으로 runs.yaml, metrics.yaml, env.yaml 생성 및 업로드
 4. 회귀 감지 시 webhook 알림 발송
 

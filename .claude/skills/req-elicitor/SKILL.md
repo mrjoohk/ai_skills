@@ -17,6 +17,10 @@ description: >
 This skill converts a problem description into four machine-readable design artifacts
 that downstream skills (`if-designer`, `uf-implementor`, etc.) depend on.
 
+> **Artifact location:** all four outputs are written under `rd/` per GLOBAL_RULES Rule 9
+> (`rd/problem_statement.md`, `rd/clarification_log.md`, `rd/assumptions_and_constraints.md`,
+> `rd/requirements.md`). Bare filenames below are shorthand for these paths.
+
 > **Read `references/reference.md`** for all output templates before writing any file.
 > **Copy templates from `assets/`** — fill in the blanks rather than writing from scratch.
 
@@ -119,13 +123,18 @@ Once all four files exist and validation passes, tell the user:
 
 ```
 ✅ Stages 1–4 complete. Output files:
-  - problem_statement.md
-  - clarification_log.md
-  - assumptions_and_constraints.md
-  - requirements.md (REQ-001 ~ REQ-N)
+  - rd/problem_statement.md
+  - rd/clarification_log.md
+  - rd/assumptions_and_constraints.md
+  - rd/requirements.md (REQ-001 ~ REQ-N)
 
-Next step → run /if-designer with requirements.md as input (Stage 5–6).
+Gate G1 (clarification): <PASS | BLOCKED>
+Next step → run /if-designer with rd/requirements.md as input (Stage 5–6).
 ```
+
+**Gate G1 — Unresolved-clarification check (before handoff):**
+- If any `[UNRESOLVED]` item in `clarification_log.md` affects a **numeric threshold or I/O range** of a REQ, mark that REQ `[GATE-BLOCKED: Q-##]` and report `Gate G1: BLOCKED` — if-designer must not proceed on blocked REQs.
+- `[UNRESOLVED]` items that affect no numeric criterion → `Gate G1: PASS (WARN: N unresolved)` and carry the list forward in the handoff message.
 
 ---
 

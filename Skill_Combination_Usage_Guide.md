@@ -417,6 +417,7 @@ Compute the oracle metrics and produce the validation report.
 | `uf-implementor` | `uf.md`, `uf_if_coverage_review.md` | `if-integrator` |
 | `if-integrator` | `if_list.md`, `src/uf/` | `eval-runner`, `ci-evidence-automation` |
 | `uf-chain-validator` | `uf.md`, `src/uf/` | `uf-implementor` (fix cycle) |
+| `fresh-eyes-auditor` | 파일 매니페스트 (rd/ 설계 문서 ± src/) — 무맥락 에이전트 스폰 | 자문 리포트 → 결함별 담당 스킬 라우팅 (advisory, 비차단) |
 | `uf-if-debug-mapper` | error symptoms, `uf.md`, `if_list.md` | `uf-chain-validator` |
 | `agent-orchestration` | `if_list.md`, task description | `agent-executor` |
 | `agent-executor` | `agents/*.md` | merged outputs → next skill |

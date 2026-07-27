@@ -38,7 +38,7 @@
 ```
 
 **Expected Output:**
-- `verification_plan.md` — staged test plan with coverage goals
+- `evaluation_plan.md` — staged test plan with coverage goals
 - Proposed `evidence_pack/` structure
 
 ---

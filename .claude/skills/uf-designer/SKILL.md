@@ -33,8 +33,8 @@ that `uf-implementor` can directly implement.
 
 ## Input
 
-- **Required:** `if_decomposition.md` (produced by `if-designer`)
-- **Optional:** `if_list.md` — use to look up parent IF I/O contracts if needed
+- **Required:** `rd/if_decomposition.md` (produced by `if-designer`; design artifacts live under `rd/` per GLOBAL_RULES Rule 9 — check `rd/` first, then project root for legacy layouts)
+- **Optional:** `rd/if_list.md` — use to look up parent IF I/O contracts if needed
 - If `if_decomposition.md` is missing, stop and ask the user to run `if-designer` first.
 
 ---
@@ -111,12 +111,20 @@ Verification Plan:
 
 ---
 
-### Phase C — I/O Chain Continuity Check
+### Phase C — I/O Chain Continuity Check + Stage 7.5 Coverage Review
 
 After writing all UF Blocks, verify the chain for each IF:
 - Output type of UF-N must match input type of UF-(N+1)
 - No implicit type conversions between UFs
 - Flag mismatches as `[CHAIN BREAK: UF-XX → UF-YY: output X ≠ input Y]`
+
+Then perform the **Stage 7.5 UF→IF coverage review** (this skill is its producer):
+- For each IF, check its acceptance criteria are covered by ≥1 UF → else `UNCOVERED`
+- Check for duplicate responsibility across UFs → `REDUNDANT`
+- Write the coverage matrix (IF rows × UF columns, PASS/UNCOVERED/REDUNDANT)
+
+**Output:** `rd/uf_if_coverage_review.md` — this file is the **entry gate for `uf-implementor` (Gate G2)**.
+Any `UNCOVERED` → revise `uf.md`/`if_list.md` and re-run before handoff.
 
 ---
 
@@ -158,15 +166,15 @@ Each companion file contains:
 ## Downstream Handoff
 
 ```
-✅ Stage 7 complete.
-  - uf.md                  (canonical UF Blocks — all IFs)
-  - uf_split/uf_if01.md    (per-IF companion view, IF-01)
-  - uf_split/uf_if02.md    (per-IF companion view, IF-02)
-  - ...                    (one file per IF)
+✅ Stage 7 + 7.5 complete.
+  - rd/uf.md                     (canonical UF Blocks — all IFs)
+  - rd/uf_if_coverage_review.md  (Stage 7.5 coverage matrix — Gate G2, no UNCOVERED)
+  - rd/uf_split/uf_if01.md       (per-IF companion view, IF-01)
+  - ...                          (one file per IF)
 
 Two options for next steps:
-  A. Validate design first  → run /uf-chain-validator with uf.md + if_list.md
-  B. Start implementing     → run /uf-implementor with uf.md (or per-IF uf_split/ file)
+  A. Validate design first  → run /uf-chain-validator with rd/uf.md + rd/if_list.md
+  B. Start implementing     → run /uf-implementor with rd/uf.md + rd/uf_if_coverage_review.md
 ```
 
 ---

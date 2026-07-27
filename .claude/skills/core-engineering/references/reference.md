@@ -11,7 +11,7 @@
 | 5 | IF Identification | `if_list.md` |
 | 6 | IF Decomposition | `if_decomposition.md` |
 | 7 | UF Definition | `uf.md` (UF blocks) |
-| 8 | Verification & Evidence Planning | `verification_plan.md`, `evidence_pack/` |
+| 8 | Verification & Evidence Planning | `evaluation_plan.md`, `evidence_pack/` |
 
 ---
 
