@@ -5,11 +5,6 @@ user-invocable: true
 allowed-tools: Read, Write, Bash, Grep, Glob
 ---
 
-> **Tool policy**: Bash/Grep/Glob are granted **solely to run the bundled validator scripts
-> and read-only inspection commands** (`git diff`, `pytest --collect-only`, etc.).
-> A validator without execution tools degrades into manual inspection — the historical
-> cause of false-PASS verdicts. Never use Bash here to modify project state.
-
 # UF Chain Validator
 
 Validates the correctness of a UF chain against three independent gates.
@@ -30,8 +25,7 @@ not whether every UF has a standalone test.
 ## Inputs
 - Path(s) to UF definition files (e.g., `rd/uf.md`, `rd/uf_split/uf_if*.md` — design artifacts live under `rd/` per GLOBAL_RULES Rule 9; check `rd/` first, then project root for legacy layouts)
 - `rd/if_list.md` — used to verify IF-level acceptance test references
-- `rd/requirements.md` — REQ-block `Tests:`/`Evidence:` declarations are also in Gate 2 scope (declared paths that exist nowhere are a known false-PASS source)
-- Optional: `rd/contracts.json` — IF contract ↔ code type mapping for the Gate 1 field-level check (see `assets/contracts.example.json`; absent → that check is SKIP/WARN, not FAIL)
+- `rd/requirements.md` — REQ 블록의 Tests/Evidence 선언 경로도 Gate 2 대조 범위 (2026-07-27 편입 — 유령 경로(replay_check.py류) 재발 방지)
 - Project source paths (e.g., `src/`)
 - Test paths (e.g., `tests/`)
 - Evidence pack root (e.g., `evidence_pack/`)
@@ -54,18 +48,15 @@ Checks that the implemented chain produces correct outputs at runtime.
 - Each UF has an explicit I/O contract (type + unit/shape + range)
 - I/O chain continuity: output type of UF-N matches input type of UF-(N+1)
 - No implicit type conversions between UFs
+- **계약 필드 ↔ 코드 대조 (2026-07-27)**: IF 계약의 struct 필드 열거를 코드의 대응 타입 선언과 **필드 단위**로 대조 — `scripts/validate_contract_fields.py` 실행
 - Runtime smoke test passes (if available): invoke the chain end-to-end with a known input
-- **Contract fields ↔ code declaration**: field-level comparison of each IF contract's
-  struct field list against the corresponding code type declaration — run
-  `scripts/validate_contract_fields.py` (requires `rd/contracts.json`; if the file is
-  absent, report this check as SKIP with a WARN to create the mapping)
 
 **FAIL conditions:**
 - Missing UF blocks or broken UF-ID sequence
 - I/O contract absent or underspecified (e.g., "tensor" without shape)
 - Chain break: output/input type mismatch at any UF boundary
+- 계약에 선언된 struct 필드가 코드 타입 선언에 부재 (validate_contract_fields.py MISSING)
 - Runtime invocation raises an uncaught exception
-- A contract-declared struct field is absent from the code type declaration (`validate_contract_fields.py` MISSING)
 
 **WARN conditions:**
 - I/O range not specified (type + shape present but value range missing)
@@ -77,18 +68,10 @@ Checks that the implemented chain produces correct outputs at runtime.
 Checks that every UF's declared `Verification Plan` is internally consistent and
 that the referenced test artifacts exist (or are explicitly deferred).
 
-**Mechanization (mandatory):** before judging, run `scripts/validate_test_paths.py`
-to obtain an exhaustive existence table of declared paths and `::function` tokens.
-The check direction is strictly **declaration → artifact** (never enumerate existing
-files and confirm presence — the reverse direction is a documented cause of false PASS).
-Compare down to `::function` granularity; a file that exists but lacks the declared
-function (GHOST_FUNC) is an immediate FAIL.
-
-**PLANNED convention:** a declaration for a not-yet-implemented milestone is exempt only
-if its line carries an explicit plan marker — `PLANNED` or `예정`, ideally with a milestone
-tag, e.g. `(PLANNED M4)` / `(M4 예정)`. Missing marker = FAIL. MISSING entries (file absent,
-no marker) are report-only by default; **promote them to FAIL for any IF/REQ scope that has
-been declared complete**, and run `--strict` at release gates.
+**기계화 (필수 — 2026-07-27):** 판정 전에 `scripts/validate_test_paths.py`를 실행해 선언 경로·`::함수`
+실존 전수 표를 확보한다. 검사는 반드시 **선언→실물** 방향으로 수행한다 (실물 파일 목록에서 존재를
+확인하는 역방향 검사 금지 — Round 3 오판의 원인). `::함수` 단위까지 대조하며, 파일은 있으나
+함수가 없는 GHOST_FUNC은 즉시 FAIL이다.
 
 **Ownership-based rules:**
 
@@ -103,7 +86,7 @@ been declared complete**, and run `--strict` at release gates.
 - A `UF-local` UF names a test path that does not exist in `tests/`
 - A `guard-rail+chain` or `IF-acceptance` UF has no Chain Verification path named
 - A `guard-rail+chain` or `IF-acceptance` UF has a standalone functional test path listed as its primary coverage mechanism (contradicts ownership)
-- A declared path's role was fulfilled by a *different* artifact (e.g., a CI gate script, or the function was split into several) — FAIL until the design document is updated to the real paths (the document must follow the implementation, not be silently forgiven)
+- 선언 경로의 역할이 다른 실물(예: run_ci.sh 게이트, 분해된 복수 함수)로 이행 구현된 경우 — 설계 문서를 실경로로 갱신하기 전까지 FAIL (구현이 아니라 문서가 따라와야 한다)
 
 **WARN conditions:**
 - `UF-local` coverage target below 90% without justification
@@ -127,21 +110,19 @@ Checks that the evidence pack references are consistent with the declared verifi
 **Checks:**
 - Each `UF-local` UF has a corresponding evidence entry (test run result, coverage report)
 - Each IF-chain test referenced in `guard-rail+chain` or `IF-acceptance` UFs has a corresponding evidence entry
-- **Evidence freshness (commit-based, not time-based):** if the latest run's `commit_sha`
-  differs from `HEAD` *and* source/test paths (e.g., `src/`, `include/`, `tests/`) have a diff
-  between them, the evidence is **STALE** — it must not be cited as a basis for any verdict
-  until re-run. (The old "> 7 days" rule is abolished: age is irrelevant, code change is not.)
+- Evidence freshness: evidence 최신 run의 `commit_sha`와 HEAD 사이에 src/include/tests 변경이 있으면 **STALE** — 재실행 전까지 해당 evidence 인용 금지 (2026-07-27: '7일 경과' 기준 폐지 — 기준은 시간이 아니라 코드 변경 여부)
 - `uf_split/` companion files exist for every IF and are in sync with `uf.md`
 
 **FAIL conditions:**
 - Evidence entry missing for a `UF-local` UF that claims PASS
 - IF-chain evidence missing for `guard-rail+chain` or `IF-acceptance` UFs
 - `uf_split/` files out of sync with `uf.md` (UF-ID or Ownership mismatch)
-- A PASS verdict cites STALE evidence (`commit_sha` ≠ HEAD + source diff exists)
+
+**FAIL conditions (추가):**
+- STALE evidence(commit_sha ≠ HEAD + 소스 diff 존재)를 근거로 PASS를 주장하는 경우
 
 **WARN conditions:**
-- Evidence entry lacks `commit_sha` (freshness undeterminable)
-- Evidence was produced on a dirty working tree (uncommitted source changes at run time)
+- Evidence에 commit_sha 미기록 (신선도 판정 불가)
 
 ---
 
@@ -176,24 +157,14 @@ Overall: PASS / FAIL
 
 ---
 
-## Bundled Scripts
-
-| Script | Gate | Purpose |
-|---|---|---|
-| `scripts/validate_test_paths.py` | Gate 2 | Exhaustive declaration→artifact check of paths and `::function` tokens in `rd/uf.md`, `rd/requirements.md`, `rd/uf_split/*.md`. GHOST_FUNC = always FAIL; MISSING = report-only (`--strict` → FAIL); `PLANNED`/`예정` marker = exempt. |
-| `scripts/validate_contract_fields.py` | Gate 1 | Field-level comparison of IF contract struct fields vs code type declarations. Mapping lives in the **project's** `rd/contracts.json` (never inside this skill — see `assets/contracts.example.json`). |
-
-```bash
-python <skill_dir>/scripts/validate_test_paths.py --root . [--strict]
-python <skill_dir>/scripts/validate_contract_fields.py . [--contracts rd/contracts.json]
-```
-
----
-
 ## MCP Integration
 - `mcp.filesystem`: scan UF docs, test directories, and evidence pack
 - `mcp.shell`: run `pytest -q`, `pytest --cov`, `ruff`, `mypy` (as applicable)
 - `mcp.github`: comment on PRs with the report
+
+## Bundled Scripts (2026-07-27)
+- `scripts/validate_test_paths.py` — Gate 2 기계화: rd/uf.md·rd/requirements.md·rd/uf_split의 선언 경로·`::함수` 실존 전수 대조 (GHOST_FUNC=FAIL, MISSING은 리포트·`--strict`시 FAIL)
+- `scripts/validate_contract_fields.py` — Gate 1 기계화: IF 계약 struct 필드 ↔ 코드 타입 선언 필드 대조
 
 ## Token Saving
 - Reference failing files + exact sections; avoid pasting whole documents.

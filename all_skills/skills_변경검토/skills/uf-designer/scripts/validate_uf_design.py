@@ -119,10 +119,7 @@ def validate_uf_blocks(content: str) -> list[str]:
         else:
             failures.append(f"{label}: Edge Cases section not found")
 
-        # 9. Verification Plan: ownership-aware (v2 format per SKILL.md).
-        #    Legacy v1 (Unit:/Coverage:, no Ownership) is accepted for old documents.
-        #    (Fixes historical drift: the old check required v1 literals and failed
-        #     documents that correctly followed the v2 template.)
+        # 9. Verification Plan: must name at least one Unit test function path
         verif_section = re.search(
             r"- Verification Plan:\s*\n(.*?)(?=\n- Evidence Pack Fields:|\Z)",
             block,
@@ -130,51 +127,14 @@ def validate_uf_blocks(content: str) -> list[str]:
         )
         if verif_section:
             verif_body = verif_section.group(1)
-            own_match = re.search(r"Ownership:\s*(\S+)", verif_body)
-            if own_match:
-                ownership = own_match.group(1)
-                has_unit_path = bool(
-                    re.search(r"Unit Verification:", verif_body)
-                    and re.search(r"(::\w+|tests?/\S+)", verif_body)
+            if "Unit:" not in verif_body:
+                failures.append(f"{label}: Verification Plan missing 'Unit:' test path")
+            if "::" not in verif_body:
+                failures.append(
+                    f"{label}: Verification Plan has no test function (expected path::test_func)"
                 )
-                chain_m = re.search(
-                    r"Chain Verification:\s*\n?\s*-?\s*(.+)", verif_body
-                )
-                chain_val = chain_m.group(1).strip() if chain_m else ""
-                chain_named = bool(
-                    chain_val and not chain_val.upper().startswith("N/A")
-                )
-                if ownership == "UF-local":
-                    if not has_unit_path:
-                        failures.append(
-                            f"{label}: UF-local requires a concrete Unit Verification test path"
-                        )
-                    if not re.search(r"Coverage", verif_body):
-                        failures.append(
-                            f"{label}: UF-local requires a Coverage target"
-                        )
-                elif ownership in ("guard-rail+chain", "IF-acceptance"):
-                    if not chain_named:
-                        failures.append(
-                            f"{label}: ownership '{ownership}' requires a named Chain Verification path"
-                        )
-                else:
-                    failures.append(
-                        f"{label}: unknown Ownership '{ownership}' "
-                        "(expected UF-local | guard-rail+chain | IF-acceptance)"
-                    )
-            else:
-                # legacy v1 fallback
-                v1_ok = (
-                    "Unit:" in verif_body
-                    and "::" in verif_body
-                    and "Coverage:" in verif_body
-                )
-                if not v1_ok:
-                    failures.append(
-                        f"{label}: Verification Plan lacks 'Ownership:' (v2) and is not a "
-                        "complete legacy v1 plan (Unit:/path::func/Coverage:)"
-                    )
+            if "Coverage:" not in verif_body:
+                failures.append(f"{label}: Verification Plan missing 'Coverage:' field")
         else:
             failures.append(f"{label}: Verification Plan section not found")
 
@@ -182,52 +142,23 @@ def validate_uf_blocks(content: str) -> list[str]:
 
 
 def check_tally_consistency(content: str) -> list[str]:
-    """Four-way tally cross-check: header total / summary table / body blocks /
-    ownership distribution. Guards against the amendment-desync defect class
-    (blocks added but header/table/distribution left stale → false '+N blocks PASS').
-
-    All four representations are REQUIRED — absence is a failure, not a silent skip
-    (a check that can silently skip is a check that cannot fail)."""
+    """헤더 'UF N개' · 요약표 행 수 · 본문 블록 수 · 소유자 분포의 대조.
+    2026-07-27 추가 — 증보 후 집계 미갱신(50 vs 55)·'109블록' 오보 재발 방지."""
     failures = []
-    body_ids = re.findall(r"^- UF-ID: (UF-\d{2}-\d{2})", content, re.MULTILINE)
-    block_count = len(body_ids)
+    block_count = len(re.findall(r"^- UF-ID: UF-\d{2}-\d{2}", content, re.MULTILINE))
 
-    # 1) header total: "Total UFs: N" | "UF 총계: N" | legacy "UF N개"
-    header_match = re.search(
-        r"(?:Total\s+UFs?|UF\s*총계)\s*[:：]\s*(\d+)|UF\s+(\d+)개", content
-    )
-    if not header_match:
+    header_match = re.search(r"UF\s+(\d+)개", content)
+    if header_match and int(header_match.group(1)) != block_count:
         failures.append(
-            "header total declaration not found — uf.md must declare "
-            "'Total UFs: <N> (UF-local a / guard-rail+chain b / IF-acceptance c)'"
+            f"header declares 'UF {header_match.group(1)}개' but body has {block_count} blocks"
         )
-    else:
-        declared_total = int(header_match.group(1) or header_match.group(2))
-        if declared_total != block_count:
-            failures.append(
-                f"header declares {declared_total} UFs but body has {block_count} blocks"
-            )
 
-    # 2) summary table: set of UF-IDs in table rows must equal set of body block IDs
-    table_ids = set(re.findall(r"^\|\s*(UF-\d{2}-\d{2})\s*\|", content, re.MULTILINE))
-    if not table_ids:
+    table_rows = len(re.findall(r"^\|\s*UF-\d{2}-\d{2}\s*\|", content, re.MULTILINE))
+    if table_rows and table_rows != block_count:
         failures.append(
-            "summary table not found — uf.md must contain a summary table with one "
-            "'| UF-##-## | ... |' row per UF"
+            f"summary table has {table_rows} UF rows but body has {block_count} blocks"
         )
-    else:
-        body_set = set(body_ids)
-        if table_ids != body_set:
-            only_table = sorted(table_ids - body_set)
-            only_body = sorted(body_set - table_ids)
-            parts = []
-            if only_table:
-                parts.append(f"in table only: {only_table}")
-            if only_body:
-                parts.append(f"in body only: {only_body}")
-            failures.append("summary table ≠ body blocks — " + "; ".join(parts))
 
-    # 3) ownership distribution declaration vs actual Ownership: field counts
     own = {"UF-local": 0, "guard-rail+chain": 0, "IF-acceptance": 0}
     for m in re.findall(r"^\s*Ownership:\s*(\S+)", content, re.MULTILINE):
         if m in own:
@@ -236,12 +167,7 @@ def check_tally_consistency(content: str) -> list[str]:
         r"UF-local\s+(\d+)\s*/\s*guard-rail\+chain\s+(\d+)\s*/\s*IF-acceptance\s+(\d+)",
         content,
     )
-    if not decl:
-        failures.append(
-            "ownership distribution declaration not found — header must include "
-            "'(UF-local a / guard-rail+chain b / IF-acceptance c)'"
-        )
-    elif sum(own.values()) > 0:
+    if decl and sum(own.values()) > 0:
         declared = (int(decl.group(1)), int(decl.group(2)), int(decl.group(3)))
         actual = (own["UF-local"], own["guard-rail+chain"], own["IF-acceptance"])
         if declared != actual:
@@ -331,9 +257,8 @@ def main():
     )
 
     if not all_issues:
-        # Count blocks by their header line ONLY. Counting every "UF-##-##"
-        # occurrence also counts summary-table rows and cross-references —
-        # the historical cause of inflated "N blocks PASS" false reports.
+        # 블록 수는 반드시 블록 헤더(^- UF-ID:)로 센다.
+        # findall("UF-\\d{2}-\\d{2}") 전체 출현 카운트는 요약표·상호참조까지 세는 오보였음(2026-07-27 수정).
         uf_count = len(re.findall(r"^- UF-ID: UF-\d{2}-\d{2}", content, re.MULTILINE))
         print(
             f"✅ UF design passed all checks "

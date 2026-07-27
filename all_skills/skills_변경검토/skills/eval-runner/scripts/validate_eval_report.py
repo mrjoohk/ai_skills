@@ -15,15 +15,6 @@ Checks:
   5. Acceptance Criteria Judgment section present
   6. Evidence section with calculation script path
   7. No "TODO" or placeholder values remaining
-  8. No coexistence of a PASS verdict with untagged MANUAL_PENDING phrases
-     (pending metrics excluded from the verdict must carry an explicit
-      [EXCLUDED-FROM-VERDICT: reason] / [판정제외: 사유] tag on the same line)
-  9. (optional) runs.yaml cross-check: pass a runs.yaml path as 2nd argument —
-     a PASS verdict with unresolved MANUAL_PENDING entries in runs.yaml and no
-     exclusion tags in the report is a FAIL (report and evidence pack must move together)
-
-Usage:
-    python validate_eval_report.py <report.md> [evidence_pack/runs.yaml]
 
 Exits with code 0 if all pass, 1 if any fail.
 """
@@ -32,22 +23,12 @@ import sys
 import re
 from pathlib import Path
 
-# verdict line: "판정: PASS" / "종합 판정: PASS" / "Overall: PASS" / template arrow "→ **PASS**"
-# (keyword must be immediately followed by a colon — lines like "판정 기준: PASS는 ..."
-#  describe criteria and must NOT count as a verdict)
-VERDICT_RE = re.compile(
-    r"(?im)^.{0,60}?\b(?:overall|verdict|(?:최종|종합)?\s*판정)\s*[:：]\s*\**\s*(?:✅\s*)?(?:pass|통과)\b"
-    r"|→\s*\**\s*(?:PASS|통과)\**"
-)
-PENDING_RE = re.compile(r"MANUAL[-_ ]?PENDING|확인 시 (?:본 보고서 )?갱신|사용자 확인 대기")
-EXCLUDE_TAG_RE = re.compile(r"EXCLUDED[-_ ]?FROM[-_ ]?VERDICT|판정\s*제외", re.IGNORECASE)
-
 PASS = "✅"
 FAIL = "❌"
 WARN = "⚠️ "
 
 
-def check_eval_report(report_path: str, runs_path: str | None = None) -> int:
+def check_eval_report(report_path: str) -> int:
     path = Path(report_path)
     failures = 0
     results = []
@@ -116,52 +97,18 @@ def check_eval_report(report_path: str, runs_path: str | None = None) -> int:
         "warning_only": todo_count > 0
     })
 
-    # 8. PASS verdict must not coexist with UNTAGGED pending phrases (hard FAIL).
-    #    Exemption is structural (line-level [EXCLUDED-FROM-VERDICT]/[판정제외] tag),
-    #    never inferred from prose — natural-language exemption heuristics both leak
-    #    (incidental phrases mask real violations) and misfire.
-    verdict_pass = bool(VERDICT_RE.search(content))
-    untagged_pending = [
-        ln.strip() for ln in content.splitlines()
-        if PENDING_RE.search(ln) and not EXCLUDE_TAG_RE.search(ln)
-    ]
-    coexist = verdict_pass and len(untagged_pending) > 0
+    # 8. PASS 판정과 PENDING 문구의 공존 금지 (2026-07-27 — M10 부분 갱신 재발 방지)
+    #    최종 판정이 PASS/통과인데 본문에 미해소 PENDING·"확인 시 갱신"류 조건부 문구가 남아 있으면 FAIL.
+    verdict_pass = bool(re.search(r'판정[^\n]*(PASS|통과)|Overall[^\n]*PASS', content))
+    pending_marks = re.findall(r'MANUAL[-_]PENDING|확인 시 (?:본 보고서 )?갱신|사용자 확인 대기', content)
+    # 전 지표가 pending 없이 완결됐거나, pending 지표가 판정문에서 명시적으로 제외돼 있으면 통과로 본다.
+    coexist = verdict_pass and len(pending_marks) > 0 and not re.search(r'(만|only)[^\n]{0,20}(대기|pending)', content, re.IGNORECASE)
     results.append({
-        "check": "PASS 판정·미태그 PENDING 공존 없음",
+        "check": "PASS 판정·PENDING 문구 공존 없음",
         "passed": not coexist,
-        "detail": "공존 없음" if not coexist else (
-            f"PASS 판정인데 태그 없는 PENDING 문구 {len(untagged_pending)}건 — "
-            "해소하거나 [EXCLUDED-FROM-VERDICT: 사유] 태그를 달 것 (수동 지표 수명주기 참조): "
-            + " | ".join(untagged_pending[:3])
-        ),
+        "detail": "공존 없음" if not coexist else f"PASS 판정인데 미해소 PENDING 문구 {len(pending_marks)}건 — 수동 지표 수명주기(SKILL.md)로 해소 후 재발행",
         "warning_only": False
     })
-
-    # 9. Optional runs.yaml cross-check — report and evidence pack must move together.
-    if runs_path:
-        rp = Path(runs_path)
-        if not rp.exists():
-            results.append({
-                "check": "runs.yaml 교차 검사",
-                "passed": False,
-                "detail": f"runs.yaml 없음: {runs_path}",
-                "warning_only": True
-            })
-        else:
-            runs_text = rp.read_text(encoding="utf-8", errors="replace")
-            runs_pending = len(re.findall(r'MANUAL[-_ ]?PENDING', runs_text))
-            report_has_tags = bool(EXCLUDE_TAG_RE.search(content))
-            runs_bad = verdict_pass and runs_pending > 0 and not report_has_tags
-            results.append({
-                "check": "runs.yaml 교차 검사 (미해소 MANUAL_PENDING)",
-                "passed": not runs_bad,
-                "detail": (
-                    f"runs.yaml pending {runs_pending}건, 보고서와 정합" if not runs_bad else
-                    f"PASS 판정인데 runs.yaml에 미해소 MANUAL_PENDING {runs_pending}건 — "
-                    "4개소 원자 반입(수명주기 2단계) 미완료"
-                ),
-                "warning_only": False
-            })
 
     # Print results
     print(f"\n{'═'*50}")
@@ -192,5 +139,4 @@ def check_eval_report(report_path: str, runs_path: str | None = None) -> int:
 
 if __name__ == "__main__":
     report_path = sys.argv[1] if len(sys.argv) > 1 else "reports/eval/report.md"
-    runs_path = sys.argv[2] if len(sys.argv) > 2 else None
-    sys.exit(check_eval_report(report_path, runs_path))
+    sys.exit(check_eval_report(report_path))

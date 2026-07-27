@@ -60,25 +60,6 @@ If a candidate is too large, split it and note the new IDs.
 For each UF candidate, write a full UF Block in `uf.md`.
 Use `assets/uf_block_template.md`.
 
-**uf.md header + summary table (required — tally anchor):**
-
-`uf.md` must begin with a header declaring the total and ownership distribution,
-followed by a summary table with exactly one row per UF:
-
-```markdown
-# UF Design — <project>
-Total UFs: <N> (UF-local <a> / guard-rail+chain <b> / IF-acceptance <c>)
-
-| UF-ID | Name | Parent IF | Ownership |
-|---|---|---|---|
-| UF-01-01 | ... | IF-01 | UF-local |
-```
-
-`validate_uf_design.py` cross-checks all four representations (header total /
-table rows / body blocks / ownership distribution) and FAILs on any mismatch
-or on a missing declaration. This is the guard against amendment desync
-(blocks added, header left stale → inflated "N blocks PASS").
-
 **Critical rules:**
 
 **I/O Contract** — must be as specific as the IF's contract, not more vague:
@@ -212,5 +193,5 @@ Two options for next steps:
 - [ ] I/O chain is continuous across all UFs within each IF
 - [ ] UF-IDs follow `UF-[parent_IF_num]-[seq]` format
 - [ ] `uf_split/` companion files exist for every IF and match `uf.md`
-- [ ] Header total = summary table rows = body block count = ownership distribution sum (enforced by `validate_uf_design.py` [tally] checks)
-- [ ] **Amendment mode**: when adding/removing UFs in an existing `uf.md`, recompute the header total, summary table, and ownership distribution, then re-run Phases C–E (chain review, validation, `uf_split/` regeneration) — never edit blocks alone
+- [ ] 헤더 "UF N개" 선언 = 요약표 행 수 = 본문 블록 수 = 소유자 분포 합 (validate_uf_design.py [tally] 검사가 강제, 2026-07-27)
+- [ ] **증보 모드**: 기존 uf.md에 UF를 추가/삭제한 경우, 헤더 총계·요약표·소유자 분포를 재계산하고 Phase C~E(체인 검토·검증·uf_split 재생성)를 반드시 재실행

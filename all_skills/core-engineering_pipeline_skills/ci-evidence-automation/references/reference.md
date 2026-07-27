@@ -38,7 +38,10 @@ commit_sha: <git commit hash>
 branch:     <branch name>
 trigger:    <push | pull_request | schedule>
 params:     <execution parameter key-value pairs>
-status:     <PASS | FAIL>
+status:     <PASS | FAIL | MANUAL_PENDING>
+# MANUAL_PENDING: awaiting manual-metric confirmation. On resolution, record the
+#                 result + timestamp + source, and create the results/<metric_id>.txt
+#                 evidence file (see eval-runner "Manual Metric Lifecycle")
 ```
 
 ---
@@ -49,7 +52,7 @@ status:     <PASS | FAIL>
   value:      <measured value>
   threshold:  <threshold value>
   comparison: <lte | gte | eq>
-  status:     <PASS | FAIL | WARN>
+  status:     <PASS | FAIL | WARN | MANUAL_PENDING>
   unit:       <unit>
 ```
 
@@ -60,6 +63,13 @@ status:     <PASS | FAIL>
 - Fail CI when regressions exceed thresholds
 - Include reproduction commands in regression reports
 - Acceptable regression range: `(current - baseline) / baseline <= threshold%`
+- **Evidence freshness (commit-based)**: if the latest run's `commit_sha` ≠ HEAD and
+  source/test paths have a diff between them, that evidence is **STALE** — never cite
+  it as a verdict basis until re-run (staleness is defined by code change, not elapsed time)
+- **CI suite enumeration**: derive the suite list from the filesystem
+  (glob, e.g. `tests/test_*.py` / `tests/test_*.cpp`). If a list must be hardcoded,
+  add a mandatory cross-check guard against the actual file set — otherwise newly
+  added tests are silently skipped by CI
 
 ---
 
