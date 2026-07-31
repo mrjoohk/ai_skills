@@ -1,0 +1,17 @@
+{
+  "_comment": "프로젝트 귀속 검사 정의 (PROJECT_RULES.md §4의 INV-*). tools/graph_checks.py(범용)가 소비한다. 쓰지 않는 검사 항목은 키째 삭제해도 된다 — 엔진은 있는 키만 실행한다.",
+  "dangling_constants": {
+    "_inv": "INV-1",
+    "decl_file": "<상수 선언 헤더 경로>",
+    "decl_pattern": "inline constexpr \\S+ (k\\w+)",
+    "search_globs": ["src/*.cpp", "include/**/*.hpp", "tests/*.cpp"],
+    "allow": []
+  },
+  "enum_contract": [],
+  "count_claims": [],
+  "quote_exists": [],
+  "static_asserts": [],
+  "known_open": {
+    "_comment": "검사 위반 키 → 대장 F-ID 매핑. open 항목으로 등록된 위반은 KNOWN-OPEN으로 통과(EXIT=0), 미등록 위반은 NEW(EXIT=1)."
+  }
+}
