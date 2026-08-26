@@ -122,7 +122,7 @@ KPI·TRL·예산·일정 수치는 위 파일 값을 그대로 사용한다 (재
 1. 작성된 내용 요약을 사용자에게 제시하고 승인 대기 (GLOBAL_RULES Rule 1)
 2. PPTX 파일을 `[작업폴더]/[과제명약어]_과제개요.pptx`로 저장
 3. 분석 내용은 `YYMMDD_HHMM_[과제명약어]_overview.md`로 저장 (Rule 2)
-4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
+4. `logs/files.jsonl`에 레코드 추가 (Rule 4)
 
 ---
 

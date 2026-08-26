@@ -98,7 +98,7 @@ Verification & Evidence Planning
 3. Token economy: prioritize file paths and symbol references. Do not paste large code blocks.
 4. All claims must have **evidence artifacts** (test results, logs, plots, benchmarks).
 5. Assumptions must be explicitly recorded and validated later.
-6. **All design artifacts (Stage 1–8 outputs) are written under `rd/`** per GLOBAL_RULES Rule 9 (e.g., `rd/requirements.md`, `rd/uf.md`). Skill-generated reports go to `reports/` per Rule 10. Filenames in this document are shorthand for their `rd/` paths.
+6. **All design artifacts (Stage 1–8 outputs) are written under `rd/`** per GLOBAL_RULES Rule 9 (e.g., `rd/requirements.md`, `rd/uf.md`). Skill-generated reports go to `reports/` per Rule 16. Filenames in this document are shorthand for their `rd/` paths.
 
 ---
 

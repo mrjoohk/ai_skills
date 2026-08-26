@@ -48,7 +48,7 @@ project_summary.md 생성 또는 갱신
 1. **현재 대화 히스토리** — 작업 흐름, 결정 사항, 오류·해결책
 2. **기존 설계 산출물** — `requirements.md`, `uf.md`, `if_list.md`
 3. **기존 `project_summary.md`** — 있으면 반드시 먼저 읽어 병합
-4. **작업 로그 파일** — `0.FilesUpdate.xlsx` 등
+4. **작업 로그 파일** — `logs/files.jsonl` 등
 
 ---
 

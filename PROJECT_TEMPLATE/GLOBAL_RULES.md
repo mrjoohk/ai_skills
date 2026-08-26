@@ -97,22 +97,33 @@ Example: `260318_1430_uf_status_analysis.md`, `260318_1430_uf_architecture.html`
 **Apply**: Include a "판단 근거:" section in all analysis MD files and user reports.
 
 ### Rule 4 — File Creation Log
-> All files created in the working folder must be logged in `0.FilesUpdate.xlsx`.
-> **If `0.FilesUpdate.xlsx` does not exist, create it first, then record the entry.**
+> All files created in the working folder must be logged in `logs/files.jsonl`.
+> **If `logs/files.jsonl` does not exist, create it first, then record the entry.**
 
-> **[Encoding Rule]** Always write xlsx files using the `openpyxl` library directly.
-> Never generate xlsx via intermediate paths (CSV conversion, subprocess, print redirection, etc.).
-> `openpyxl` natively handles UTF-8 Unicode, preventing silent `?` substitution of non-ASCII characters.
+> **[Format Rule]** One JSON object per line (JSONL), UTF-8, **append-only**.
+> Never rewrite, reorder, or delete existing lines — corrections are appended as new records.
+> After appending, run `python tools/worklog/validate_worklog.py logs/files.jsonl logs/prompts.jsonl`.
+> A non-zero exit is a rule violation and must be resolved before the request is closed.
 
-| Column | Content |
-|--------|---------|
-| 일시 | YYYY-MM-DD HH:MM |
-| 파일명 | Created/modified filenames. **One row per work unit; list every file, comma-separated. Wildcards (`src/*`) are forbidden** — rows must stay queryable. |
-| 요청 요약 | Core content of user's request |
-| 요청 ID | `P-xxx` from 1.PromptsUpdate.xlsx (Rule 8) |
-| 근거 ID | Ledger IDs this change serves — finding `F-xxx`, decision `D-xxx`, mapping `M-xxx` (Rule 11). Blank only when no ledger item applies. |
-| 검증 | How the change was verified: test name(s), evidence file path, or the **explicit literal "검증 없음"**. A blank cell is a rule violation — "검증 없음" is a conscious declaration and is queryable; a blank is a hole. |
-| 커밋 ID | VCS commit hash once committed; "미커밋" until then |
+| Key | 컬럼 | Content |
+|-----|------|---------|
+| `ts` | 일시 | `YYYY-MM-DD HH:MM` |
+| `files` | 파일명 | **Array**, one filename per element. One record per work unit. **Wildcards (`src/*`) are forbidden** — records must stay queryable. A whole directory is written with a trailing `/` (`logs/P-007_tick_evidence/`), never `/*`. |
+| `summary` | 요청 요약 | Core content of user's request |
+| `req_id` | 요청 ID | `P-xxx` from `logs/prompts.jsonl` (Rule 8) |
+| `basis_ids` | 근거 ID | **Array.** Ledger IDs this change serves — finding `F-xxx`, decision `D-xxx`, mapping `M-xxx` (Rule 11). Empty array only when no ledger item applies. |
+| `verify` | 검증 | How the change was verified: test name(s), evidence file path, or the **explicit literal `"검증 없음"`**. An empty string is a rule violation — `"검증 없음"` is a conscious declaration and is queryable; empty is a hole. |
+| `commit` | 커밋 ID | VCS commit hash once committed; `"미커밋"` until then |
+| `schema` | — | `"v2"` for new records. `"v1"` marks records migrated from the pre-2026-08-26 workbook, where the four keys above did not yet exist. |
+
+> **[Exception Fields]** Never invent data to satisfy the schema. When a fact cannot be recovered, state that fact instead.
+> `legacy_note` — why a wildcard or a merged row could not be resolved. This is the **only** way a wildcard passes validation.
+> `orphan_reason` — why a `req_id` has no matching record in `logs/prompts.jsonl`.
+> Both are deliberate, queryable declarations — the same principle as `"검증 없음"` above.
+
+```json
+{"ts":"2026-08-25 17:30","files":["review_docs/260825_1730_claw_mode_scenario_test_plan.md","graph/edges.csv"],"summary":"CLAW 모드별 시나리오 시험 계획 수립","req_id":"P-050","basis_ids":["F-076","M-01"],"verify":"인용 3건 원문 재확인 OK. graph_checks 위반 0건","commit":"미커밋","schema":"v2"}
+```
 
 ### Rule 5 — Output Format Standard
 > Deliverables containing tables or figures must be created as `.docx`.
@@ -142,18 +153,19 @@ Example: `260318_1430_uf_status_analysis.md`, `260318_1430_uf_architecture.html`
 **Apply to**: Any file produced as a deliverable, response, or remediation result (after user approval).
 
 ### Rule 8 — Prompt & Response Log
-> Every user request prompt and the agent's corresponding response/result must be recorded in order in `1.PromptsUpdate.xlsx`.
-> **If `1.PromptsUpdate.xlsx` does not exist, create it first.**
+> Every user request prompt and the agent's corresponding response/result must be recorded in order in `logs/prompts.jsonl`.
+> **If `logs/prompts.jsonl` does not exist, create it first.**
 
-> **[Encoding Rule]** Same as Rule 4: always use `openpyxl` directly to prevent `?` corruption of non-ASCII text.
+> **[Format Rule]** Same as Rule 4 — JSONL, UTF-8, append-only, validated after every append.
 
-| Column | Content |
-|--------|---------|
-| 일시 | YYYY-MM-DD HH:MM |
-| 요청 프롬프트 | Full text of the user's request |
-| 응답/결과/대처 | Summary of the agent's response or action taken |
-| 요청 ID | `P-xxx`, sequential. **This ID is the provenance root**: analysis docs, file-log rows (Rule 4), and ledger entries (Rule 11) reference it, so every artifact answers "which request caused this". |
-| 산출물 경로 | Paths of documents/files produced for this request (comma-separated) |
+| Key | 컬럼 | Content |
+|-----|------|---------|
+| `ts` | 일시 | `YYYY-MM-DD HH:MM` |
+| `req_id` | 요청 ID | `P-xxx`, non-decreasing. **This ID is the provenance root**: analysis docs, file-log records (Rule 4), and ledger entries (Rule 11) reference it, so every artifact answers "which request caused this". One request may span several exchanges, so **consecutive** records may repeat the same ID — but an ID must not reappear after a different one has intervened. |
+| `prompt` | 요청 프롬프트 | Full text of the user's request, verbatim, newlines included |
+| `response` | 응답/결과/대처 | Summary of the agent's response or action taken |
+| `outputs` | 산출물 경로 | **Array.** Paths of documents/files produced for this request |
+| `schema` | — | Same as Rule 4 |
 
 ### Rule 9 — Directory for Design Artifacts
 > All design documents produced by design/engineering skills must be saved in the `rd` directory.
@@ -219,8 +231,9 @@ Receive request
   → ★ VERIFY: [Rule 12] negative-control test → [Rule 14] tests + graph_checks pass
   → ★ LEDGER: [Rule 11] state transitions (open→fixed→verified), register new items
   → [Rule 7] Save outputs to output_docs/
-  → [Rule 4] Update 0.FilesUpdate.xlsx (P-ID, 근거 ID, 검증, 커밋 ID)
-  → [Rule 8] Log agent response
+  → [Rule 4] Append to logs/files.jsonl (req_id, basis_ids, verify, commit)
+  → [Rule 8] Append to logs/prompts.jsonl
+  → [Rule 4/8] python tools/worklog/validate_worklog.py logs/files.jsonl logs/prompts.jsonl
 ```
 ★ = the two nodes whose absence caused audit findings to recur across sessions.
 

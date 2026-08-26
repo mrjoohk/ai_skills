@@ -15,7 +15,12 @@ Copy the `.claude/` directory and the global rules file into your project root:
 ```bash
 cp -r .claude/ <your-project>/
 cp GLOBAL_RULES.md <your-project>/
+cp -r tools/ <your-project>/        # Rule 4/8 worklog validator, Rule 14 graph_checks
 ```
+
+For a **new** project, start from [`PROJECT_TEMPLATE/`](./PROJECT_TEMPLATE/) instead — it ships
+`GLOBAL_RULES.md`, the `PROJECT_RULES.md` skeleton (Rule 10), the ledger (`graph/edges.csv`),
+the append-only worklogs (`logs/*.jsonl`), and both checkers already wired together.
 
 **Canonical source & sync:** `all_skills/`가 모든 스킬의 **정본**이며 `.claude/skills/`는 설치본이다.
 스킬 수정은 항상 `all_skills/`에서 하고, 아래 스크립트로 드리프트 검사·동기화한다
@@ -160,11 +165,14 @@ These auditors connect to `eval-planner` by enriching it with domain-specific me
 
 [`GLOBAL_RULES.md`](./GLOBAL_RULES.md) defines project-wide conventions that apply across all skills:
 
-- Output format templates: REQ Block, IF Block, UF Block, Handoff
-- Token-saving rules: reference file paths instead of pasting large blocks
-- Evidence Pack schema: `runs.yaml`, `metrics.yaml`, `env.yaml`, `scenarios.yaml`
-- Design Process overview (8-stage summary)
-- Standard CI quality gates
+- Coding behavior principles (Part 1) and the per-request workflow (Part 2)
+- Append-only worklogs: `logs/files.jsonl` (Rule 4), `logs/prompts.jsonl` (Rule 8),
+  validated by `tools/worklog/validate_worklog.py` after every append
+- Standard directories: `review_docs/` (Rule 6), `output_docs/` (Rule 7), `rd/` (Rule 9), `reports/` (Rule 16)
+- Project binding via `PROJECT_RULES.md` (Rule 10) — GLOBAL_RULES stays project-agnostic
+- Ledger and IDs: `F-`/`D-`/`M-` in `graph/edges.csv` (Rule 11), `P-xxx` as the provenance root
+- Verification discipline: negative-control tests (Rule 12), evidence citation (Rule 13),
+  machine gates via `tools/graph_checks.py` (Rule 14), delta review + context-free audit (Rule 15)
 
 ---
 

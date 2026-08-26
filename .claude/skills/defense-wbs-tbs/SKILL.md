@@ -197,7 +197,7 @@ COLORS = {
 
 1. 사용자 검토 승인 (Rule 1)
 2. `YYMMDD_HHMM_wbs_tbs.md` 분석 저장 (Rule 2)
-3. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
+3. `logs/files.jsonl`에 레코드 추가 (Rule 4)
 
 ---
 

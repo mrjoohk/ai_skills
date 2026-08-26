@@ -284,7 +284,7 @@ defense-proposal-detail-plan (Step 7)
 **목적**: 제안서 작성 전 과정을 Key Decisions(결정|선택|기각 대안|이유) 중심으로 압축 기록
 
 **INPUT 표준 목록**
-- 대화 히스토리 + 작업폴더 산출물 + `0.FilesUpdate.xlsx`
+- 대화 히스토리 + 작업폴더 산출물 + `logs/files.jsonl`
 
 **OUTPUT 표준 목록**
 - `project_summary.md` (누적 갱신)

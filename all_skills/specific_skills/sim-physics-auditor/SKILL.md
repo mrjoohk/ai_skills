@@ -56,7 +56,7 @@ Append audit-derived metrics and thresholds to **`rd/domain_metrics.md`** (creat
 | timestep_margin | ↑ | <computed> | ≥ 2× | — | Nyquist/stability | sim-physics-auditor |
 ```
 
-`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/physics/` (GLOBAL_RULES Rule 10).
+`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/physics/` (GLOBAL_RULES Rule 16).
 
 ## MCP Integration
 - `mcp.shell`: run parameter sweeps, generate plots, calculate metrics

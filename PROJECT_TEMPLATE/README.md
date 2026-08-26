@@ -11,8 +11,9 @@ PROJECT_RULES.template.md           ← 프로젝트 바인딩 골격 (채워서
 graph/edges.csv                     ← 발견(F-)·결정(D-)·매핑(M-) 대장 (헤더만)
 graph/checks_config.template.json   ← 기계 검사 정의 골격 (채워서 checks_config.json으로)
 tools/graph_checks.py               ← 범용 검사 엔진 (수정 불필요 — 설정만 소비)
-0.FilesUpdate.xlsx                  ← 파일 로그 (v2 스키마: +요청 ID·근거 ID·검증·커밋 ID)
-1.PromptsUpdate.xlsx                ← 프롬프트 로그 (v2 스키마: +요청 ID·산출물 경로)
+logs/files.jsonl                    ← 파일 로그 (JSONL, append-only)
+logs/prompts.jsonl                  ← 프롬프트 로그 (JSONL, append-only)
+tools/worklog/                      ← 로그 스키마·검증기 (validate_worklog.py, worklog_schema.py)
 review_docs/  rd/  logs/            ← 빈 표준 디렉터리
 ```
 

@@ -106,6 +106,37 @@ Then SI-SDR >= 12.0 dB → **PASS** (measured: 12.8 dB)
 
 ---
 
+## Manual Metric Lifecycle (MANUAL_PENDING)
+
+Metrics that cannot be computed automatically (visual checks, human-in-the-loop
+confirmations, external measurements) follow this lifecycle:
+
+1. **Declare** — record status `MANUAL_PENDING` plus the confirmation procedure path in
+   both the report and `evidence_pack/runs.yaml` / `metrics.yaml`.
+2. **Ingest atomically** — when the confirmation arrives (**including out-of-pipeline
+   channels**: conversation, shared spreadsheets/docs, chat), update all four places in
+   one pass — partial updates are the defect this lifecycle exists to prevent:
+   - ① create `evidence_pack/<pack>/results/<metric_id>.txt` — result, confirmation
+     timestamp, and source citation (where the confirmation came from)
+   - ② resolve the pending entry in `runs.yaml` / `metrics.yaml` (record result + source)
+   - ③ update the report verdict and delete conditional phrases ("will update upon
+     confirmation" and similar)
+   - ④ sync every other document that mentions the metric (coverage review, etc.)
+3. **Excluding from verdict** — a metric may stay pending under an overall PASS **only**
+   if its line carries an explicit tag: `[EXCLUDED-FROM-VERDICT: <reason>]` (Korean
+   `[판정제외: <사유>]` also accepted). The tag is what the validator checks — free-text
+   explanations do not count.
+4. **Final sweep** — before finishing:
+   ```bash
+   grep -riE "MANUAL[-_ ]?PENDING|확인 시 갱신|사용자 확인 대기" reports/ evidence_pack/
+   ```
+   (note `-E` — without it the `|` alternation is literal and the sweep can never match).
+   Every remaining hit must be either resolved or tagged. **A PASS verdict coexisting
+   with an untagged pending phrase is itself a report defect** — `validate_eval_report.py`
+   check #8 FAILs it.
+
+---
+
 ## Notes
 - Always verify that metric direction (↑/↓) and threshold comparison direction match
 - When comparing multiple experiments, specify that identical datasets, splits, and random seeds were used
@@ -123,5 +154,8 @@ Then SI-SDR >= 12.0 dB → **PASS** (measured: 12.8 dB)
 | `scripts/validate_eval_report.py` | Run after generating the evaluation report to verify completeness |
 
 ```bash
-python <skill_dir>/scripts/validate_eval_report.py reports/eval/<task>_report.md
+python <skill_dir>/scripts/validate_eval_report.py reports/eval/<task>_report.md [evidence_pack/runs.yaml]
 ```
+
+Pass `evidence_pack/runs.yaml` as the second argument to also cross-check that a PASS
+report does not coexist with unresolved `MANUAL_PENDING` entries in the evidence pack.

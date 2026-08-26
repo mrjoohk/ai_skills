@@ -54,7 +54,7 @@ Append audit-derived metrics and thresholds to **`rd/domain_metrics.md`** (creat
 | dup_rate | ↓ | <measured> | ≤ <target> | % | index bloat guard | rag-data-quality |
 ```
 
-`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/rag/` (GLOBAL_RULES Rule 10).
+`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/rag/` (GLOBAL_RULES Rule 16).
 
 ## MCP Integration
 - `mcp.filesystem`: scan corpus and metadata

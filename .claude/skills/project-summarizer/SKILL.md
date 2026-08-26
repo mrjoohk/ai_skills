@@ -26,7 +26,7 @@ description: >
    - `project_summary.md` (기존 요약본, 있으면 반드시 먼저 읽기)
    - `requirements.md`, `uf.md`, `if_list.md` (설계 산출물)
    - `GLOBAL_RULES.md` (프로젝트 규칙)
-   - `0.FilesUpdate.xlsx`, `1.PromptsUpdate.xlsx` (작업 로그)
+   - `logs/files.jsonl`, `logs/prompts.jsonl` (작업 로그)
    - `review_docs/`, `output_docs/` 디렉토리 내 파일 목록
    - 최근 수정된 `.md`, `.py`, `.ts`, `.js` 파일 (최대 10개)
 3. **사용자에게 확인** — 수집된 정보만으로 부족하면 아래 질문 중 필요한 것만 선택해서 묻는다:

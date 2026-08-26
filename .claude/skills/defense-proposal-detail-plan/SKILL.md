@@ -200,7 +200,7 @@ description: >
 1. 사용자 검토 승인 (Rule 1)
 2. `[작업폴더]/[과제명약어]_세부연구계획.pptx` 저장
 3. `YYMMDD_HHMM_[과제명약어]_detail_plan.md` 분석 저장 (Rule 2)
-4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
+4. `logs/files.jsonl`에 레코드 추가 (Rule 4)
 
 ---
 

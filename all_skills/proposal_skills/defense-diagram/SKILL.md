@@ -140,7 +140,7 @@ clip art, drop shadows, decorative borders
 
 1. SVG 파일을 `[작업폴더]/figures/` 에 저장
 2. AI 프롬프트는 `[작업폴더]/figures/prompts/fig_N_prompt.md` 에 저장
-3. `GLOBAL_RULES.md` Rule 4에 따라 `0.FilesUpdate.xlsx`에 로그 기록
+3. `GLOBAL_RULES.md` Rule 4에 따라 `logs/files.jsonl`에 로그 기록
 
 ---
 

@@ -188,7 +188,7 @@ defense-diagram 스킬로 (E) 기술 비교도 유형 사용.
 1. 사용자 검토 승인 (Rule 1)
 2. `[작업폴더]/[과제명약어]_기술현황분석.pptx` 저장
 3. `YYMMDD_HHMM_[과제명약어]_tech_analysis.md` 분석 저장 (Rule 2)
-4. `0.FilesUpdate.xlsx` 업데이트 (Rule 4)
+4. `logs/files.jsonl`에 레코드 추가 (Rule 4)
 
 ---
 

@@ -52,7 +52,7 @@ Append audit-derived metrics and thresholds to **`rd/domain_metrics.md`** (creat
 | uf_latency_p95 | ↓ | <measured> | ≤ <req> | ms | REQ-## constraint | gpu-hpc-guard |
 ```
 
-`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/gpu/` (GLOBAL_RULES Rule 10).
+`eval-planner` reads `rd/domain_metrics.md` as a first-class input (its Inputs #3) and cites the auditor per adopted metric. Detailed audit bodies stay in `reports/gpu/` (GLOBAL_RULES Rule 16).
 
 ## MCP Integration
 - `mcp.shell`: run microbenchmarks, profiling, collect `nvidia-smi` / `htop` snapshots

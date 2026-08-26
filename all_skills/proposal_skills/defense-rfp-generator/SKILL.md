@@ -188,7 +188,7 @@ docx 스킬 방식(docx-js)으로 RFP 문서를 생성한다.
 ### 파일 저장
 - 경로: `/mnt/proposal/YYMMDD_HHMM_synthetic_RFP_[주제약어].docx`
 - 분석 요약: `/mnt/proposal/YYMMDD_HHMM_synthetic_RFP_[주제약어].md`
-- 0.FilesUpdate.xlsx 로그 갱신 (GLOBAL_RULES Rule 4)
+- logs/files.jsonl에 레코드 추가 (GLOBAL_RULES Rule 4)
 
 ### 생성 후 검증
 ```bash
@@ -207,7 +207,7 @@ python /mnt/.skills/skills/docx/scripts/office/validate.py [파일경로]
 ```
 
 - 이 태그는 하류 스킬(defense-proposal-prep, 섹션 스킬)이 **산출물에 그대로 승계**한다 — 합성 가정 위에서 작성된 섹션임을 추적 가능하게 유지.
-- 실제 RFP로 교체 시: 사용자 확인을 받아 태그를 제거하고, 교체 사실을 `0.FilesUpdate.xlsx`에 기록. prep 분석은 실제 RFP 기준으로 재실행 권장.
+- 실제 RFP로 교체 시: 사용자 확인을 받아 태그를 제거하고, 교체 사실을 `logs/files.jsonl`에 기록. prep 분석은 실제 RFP 기준으로 재실행 권장.
 
 ## 다음 단계 안내
 

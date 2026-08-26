@@ -1,0 +1,5 @@
+id,type,severity,title,location,status,fix_ref,test_ref,source_doc,notes
+F-012,finding,WARN,rate limiter 창이 제어 주기와 무관하게 고정,src/rate_limiter.cpp:88,open,,,review_docs/260115_1400_fresh_eyes_audit.md,
+F-013,finding,CRITICAL,존재하지 않는 RFC 인용,rd/design.md:41,open,,,review_docs/260115_1400_fresh_eyes_audit.md,웹 대조로 부재 확인
+F-002,finding,WARN,타임아웃 문서-코드 불일치,src/link.cpp:52,verified,commit a1b2c3,tests/link_timeout_test (되돌리면 실패 확인),review_docs/251220_0900_fresh_eyes_audit.md,
+D-003,decision,,재전송 3회는 자체 결정으로 재분류 (RFC 인용 폐기),rd/design.md:41,verified,,,review_docs/260115_1400_fresh_eyes_audit.md,supersedes: design.md 구판 근거 서술

@@ -136,7 +136,7 @@ docx 스킬(SKILL.md: /mnt/.skills/skills/docx/SKILL.md)의 docx-js 방식으로
 ### 파일 저장
 - 경로: `/mnt/proposal/YYMMDD_HHMM_execution_manual_[주제약어].docx`
 - 요약 md: `/mnt/proposal/YYMMDD_HHMM_execution_manual_[주제약어].md`
-- 0.FilesUpdate.xlsx에 두 파일 모두 로그 추가 (GLOBAL_RULES Rule 4)
+- logs/files.jsonl에 두 파일 모두 로그 추가 (GLOBAL_RULES Rule 4)
 
 ### 생성 후 검증
 ```bash

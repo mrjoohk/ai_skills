@@ -113,8 +113,8 @@
 |------|----------|------|
 | 설계 문서 | `requirements.md` | |
 | 설계 문서 | `uf.md` | |
-| 작업 로그 | `0.FilesUpdate.xlsx` | |
-| 프롬프트 로그 | `1.PromptsUpdate.xlsx` | |
+| 작업 로그 | `logs/files.jsonl` | |
+| 프롬프트 로그 | `logs/prompts.jsonl` | |
 
 ```
 

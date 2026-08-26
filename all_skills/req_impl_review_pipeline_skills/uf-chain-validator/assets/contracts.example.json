@@ -1,0 +1,13 @@
+[
+  {
+    "id": "IF-01.state",
+    "doc": "rd/if_list.md",
+    "doc_pattern": "state:\\s*struct,\\s*\\{([^}]*)\\}",
+    "code": "src/types.hpp",
+    "code_struct": "State",
+    "aliases": {
+      "pos": ["pos", "position"],
+      "vel": ["vel", "velocity"]
+    }
+  }
+]
