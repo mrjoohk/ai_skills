@@ -1,0 +1,3 @@
+# Keep the serialized simulation model byte-stable for profile SHA-256 checks.
+skills/office_document_pipeline/doc-writer/templates/technical-report/model.hwpml text eol=lf
+*.package.zip binary

@@ -1,0 +1,318 @@
+{
+  "schema_version": 3,
+  "canonical_root": "skills",
+  "categories": {
+    "engineering_pipeline": [
+      "core-engineering",
+      "context-engineering",
+      "req-elicitor",
+      "if-designer",
+      "uf-designer",
+      "uf-chain-validator",
+      "uf-implementor",
+      "if-integrator",
+      "uf-if-debug-mapper",
+      "theory-decomposer",
+      "eval-planner",
+      "exp-runner",
+      "eval-runner",
+      "ci-evidence-automation",
+      "fresh-eyes-auditor"
+    ],
+    "coding_agent_pipeline": [
+      "repo-doc-writer",
+      "cursor-task-formatter",
+      "code-reviewer"
+    ],
+    "proposal_pipeline": [
+      "defense-rfp-generator",
+      "defense-proposal-prep",
+      "defense-kpi-benchmark",
+      "defense-proposal-writer",
+      "defense-diagram",
+      "defense-wbs-tbs",
+      "defense-execution-manual",
+      "defense-proposal-assembler"
+    ],
+    "office_document_pipeline": [
+      "doc-writer",
+      "office-drm-bridge"
+    ],
+    "domain_audits": [
+      "gpu-hpc-guard",
+      "sim-physics-auditor",
+      "rag-data-quality"
+    ],
+    "agent_orchestration": [
+      "agent-orchestration",
+      "agent-executor"
+    ],
+    "artifact_workflows": [
+      "dashboard-designer",
+      "travel-planner-html"
+    ],
+    "general": [
+      "project-summarizer"
+    ]
+  },
+  "pipelines": {
+    "engineering": {
+      "description": "문제 정의 → IF/UF 설계 → 구현·독립 검토 → 실험·평가·CI → 요약",
+      "skills": [
+        "core-engineering",
+        "context-engineering",
+        "req-elicitor",
+        "if-designer",
+        "uf-designer",
+        "uf-chain-validator",
+        "uf-implementor",
+        "if-integrator",
+        "uf-if-debug-mapper",
+        "theory-decomposer",
+        "eval-planner",
+        "exp-runner",
+        "eval-runner",
+        "ci-evidence-automation",
+        "fresh-eyes-auditor",
+        "code-reviewer",
+        "project-summarizer"
+      ],
+      "optional_skills": [
+        "gpu-hpc-guard",
+        "sim-physics-auditor",
+        "rag-data-quality"
+      ]
+    },
+    "coding-agent": {
+      "description": "설계 → 외부 코딩 에이전트 문서·프롬프트 → 리뷰·수정",
+      "skills": [
+        "context-engineering",
+        "req-elicitor",
+        "if-designer",
+        "uf-designer",
+        "uf-chain-validator",
+        "uf-if-debug-mapper",
+        "repo-doc-writer",
+        "cursor-task-formatter",
+        "code-reviewer",
+        "project-summarizer"
+      ]
+    },
+    "proposal": {
+      "description": "RFP → 전략·KPI → 섹션 작성·도식화 → 제안서 통합",
+      "skills": [
+        "defense-rfp-generator",
+        "defense-proposal-prep",
+        "defense-kpi-benchmark",
+        "defense-proposal-writer",
+        "defense-diagram",
+        "defense-wbs-tbs",
+        "defense-execution-manual",
+        "defense-proposal-assembler",
+        "project-summarizer"
+      ]
+    },
+    "office-documents": {
+      "description": "Office·한글 판독 → 명세·필드/치환/작성 → 보호·결과 검증",
+      "skills": [
+        "doc-writer",
+        "office-drm-bridge"
+      ],
+      "external_dependencies": [
+        "Windows Office/한글·pywin32 (해당 COM 작업만)",
+        "Pillow (그림 변환·시험)",
+        "현재 작업의 출처·내용·필요한 사용자 서식",
+        "원격 insert·figpack은 현재 도구를 확인한 지문이 필요"
+      ]
+    },
+    "domain-audits": {
+      "description": "GPU/HPC·물리·RAG 도메인별 조건부 감사",
+      "skills": [
+        "gpu-hpc-guard",
+        "sim-physics-auditor",
+        "rag-data-quality"
+      ]
+    },
+    "orchestration": {
+      "description": "역할 설계 → 에이전트 실행 → 결과 요약",
+      "skills": [
+        "context-engineering",
+        "agent-orchestration",
+        "agent-executor",
+        "project-summarizer"
+      ]
+    },
+    "artifacts": {
+      "description": "대시보드·여행 일정 HTML 생성",
+      "skills": [
+        "dashboard-designer",
+        "travel-planner-html"
+      ]
+    },
+    "general": {
+      "description": "프로젝트 요약 문서 생성·갱신",
+      "skills": [
+        "project-summarizer"
+      ]
+    }
+  },
+  "skill_install_excludes": {
+    "doc-writer": [
+      "runtime"
+    ]
+  },
+  "project_resources": [
+    {
+      "when_skills": [
+        "doc-writer"
+      ],
+      "source": "skills/office_document_pipeline/doc-writer/runtime",
+      "destination": "tools/doc-writer",
+      "required_files": [
+        "write_doc.py",
+        "insert_doc.py",
+        "figure_pack.py",
+        "fake_write.py",
+        "table_style.py",
+        "template_profiles.py",
+        "_console.py",
+        "assets/figure_placeholder.png",
+        "template_model.py"
+      ]
+    },
+    {
+      "when_skills": [
+        "doc-writer"
+      ],
+      "source": "skills/office_document_pipeline/doc-writer/backends/hwp/scripts",
+      "destination": "tools/hwpx-drm/scripts",
+      "required_files": [
+        "hwpx_api.py",
+        "hwp_session.py",
+        "hwpml_parse.py",
+        "hwpx_drm.py",
+        "render_md.py",
+        "images.py"
+      ]
+    },
+    {
+      "when_skills": [
+        "doc-writer"
+      ],
+      "source": "skills/office_document_pipeline/doc-writer/backends/hwp/tests",
+      "destination": "tools/hwpx-drm/tests",
+      "required_files": [
+        "fake_hwp.py"
+      ]
+    },
+    {
+      "when_skills": [
+        "doc-writer"
+      ],
+      "source": "skills/office_document_pipeline/doc-writer/backends/hwp/dev",
+      "destination": "tools/hwpx-drm/dev",
+      "required_files": [
+        "capture_hwpml.py"
+      ]
+    },
+    {
+      "when_skills": [
+        "doc-writer"
+      ],
+      "source": "skills/office_document_pipeline/doc-writer/templates",
+      "destination": "document_templates",
+      "required_files": [
+        "technical-report/profile.json",
+        "technical-report/template.package.zip",
+        "technical-report/model.hwpml",
+        "technical-report/table_style.json",
+        "technical-report/build_hwpx_template.py",
+        "technical-report/validate_hwpx_template.py"
+      ]
+    }
+  ],
+  "skill_aliases": {
+    "office-com-reader": {
+      "skill": "doc-writer",
+      "mode": "office-read"
+    },
+    "office-com-writer": {
+      "skill": "doc-writer",
+      "mode": "office-edit"
+    },
+    "hwpx-drm": {
+      "skill": "doc-writer",
+      "mode": "hwp"
+    },
+    "defense-proposal-overview": {
+      "skill": "defense-proposal-writer",
+      "section": "overview"
+    },
+    "defense-proposal-rd-plan": {
+      "skill": "defense-proposal-writer",
+      "section": "rd-plan"
+    },
+    "defense-proposal-tech-analysis": {
+      "skill": "defense-proposal-writer",
+      "section": "tech-analysis"
+    },
+    "defense-proposal-research-plan": {
+      "skill": "defense-proposal-writer",
+      "section": "research-plan"
+    },
+    "defense-proposal-detail-plan": {
+      "skill": "defense-proposal-writer",
+      "section": "detail-plan"
+    }
+  },
+  "retired_entrypoint_hashes": {
+    "office-com-reader": "a5d9a151bd6cf24eb90815ba8b474dfbf00eff3dac700d50b12ab4d8535b883c",
+    "office-com-writer": "5f3780f4823a4269729161f83f883e1431d33b535c0844cd4edc3fe5a0ee4767",
+    "hwpx-drm": "2c107e0579efb0ea3383b75fae354e73f09317d7c248c06ddbf03ac319992c48",
+    "defense-proposal-overview": "4b02b50d7cebfd9dc957d47c7125868e2f215e86d290aa037962aab89c7c10c7",
+    "defense-proposal-rd-plan": "5b96b827625a2cd91606b9f6c3ceda853027a2cdd7c91ef444184858d2393a5e",
+    "defense-proposal-tech-analysis": "91a63a8ad06d2826d672334bfcc914412cbf50bc2a6f5406037317b558537d67",
+    "defense-proposal-research-plan": "50b5784a53192c0aa45afe96484c1bba6e155208d55b246b1bf90d3d038bb793",
+    "defense-proposal-detail-plan": "308e083ee64da1133357c42447527e1c055cedb9456d3778efbc5ca008f121fe"
+  },
+  "skill_required_files": {
+    "doc-writer": [
+      "backends/office-reader/scripts/probe_format.py",
+      "backends/office-reader/scripts/read_office_doc.py",
+      "backends/office-writer/scripts/write_office_doc.py",
+      "backends/office-writer/scripts/verify_protection.py",
+      "backends/hwp/scripts/hwpx_api.py",
+      "references/office.md",
+      "references/hwp.md",
+      "references/spec.md",
+      "references/profiles.md",
+      "templates/technical-report/profile.json",
+      "templates/technical-report/template.package.zip",
+      "templates/technical-report/model.hwpml"
+    ],
+    "defense-proposal-writer": [
+      "templates/overview.md",
+      "templates/rd-plan.md",
+      "templates/tech-analysis.md",
+      "templates/research-plan.md",
+      "templates/detail-plan.md",
+      "templates/custom.md",
+      "references/sections/overview.md",
+      "references/sections/rd-plan.md",
+      "references/sections/tech-analysis.md",
+      "references/sections/research-plan.md",
+      "references/sections/detail-plan.md"
+    ],
+    "agent-orchestration": [
+      "assets/agent-role-template.md",
+      "assets/orchestration-plan-template.md",
+      "references/reference.md",
+      "references/examples.md",
+      "references/engineering-manifest.md"
+    ],
+    "agent-executor": [
+      "references/reference.md",
+      "references/examples.md"
+    ]
+  }
+}

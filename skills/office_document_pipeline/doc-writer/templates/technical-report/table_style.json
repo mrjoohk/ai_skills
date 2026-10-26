@@ -1,0 +1,433 @@
+{
+  "source": "synthetic-template",
+  "default": "용어",
+  "alias": {},
+  "tables": {
+    "문서요약": {
+      "ref_id": "s1.t0",
+      "size": [
+        3,
+        2
+      ],
+      "cells": [
+        [
+          {
+            "L": [
+              "Solid",
+              "0.4mm"
+            ],
+            "R": [
+              "Solid",
+              "0.12mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": [
+              214,
+              214,
+              214
+            ],
+            "style": "05_도표내용_항목제목",
+            "header": false
+          },
+          {
+            "L": [
+              "Solid",
+              "0.12mm"
+            ],
+            "R": [
+              "Solid",
+              "0.4mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": [
+              214,
+              214,
+              214
+            ],
+            "style": "05_도표내용_항목제목",
+            "header": false
+          }
+        ],
+        [
+          {
+            "L": [
+              "Solid",
+              "0.4mm"
+            ],
+            "R": [
+              "Solid",
+              "0.12mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.12mm"
+            ],
+            "fill": null,
+            "style": "07_도표내용_본문혼합",
+            "header": false
+          },
+          {
+            "L": [
+              "Solid",
+              "0.12mm"
+            ],
+            "R": [
+              "Solid",
+              "0.4mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.12mm"
+            ],
+            "fill": null,
+            "style": "07_도표내용_본문혼합",
+            "header": false
+          }
+        ],
+        [
+          {
+            "L": [
+              "Solid",
+              "0.4mm"
+            ],
+            "R": [
+              "Solid",
+              "0.12mm"
+            ],
+            "T": [
+              "Solid",
+              "0.12mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": null,
+            "style": "07_도표내용_본문혼합",
+            "header": false
+          },
+          {
+            "L": [
+              "Solid",
+              "0.12mm"
+            ],
+            "R": [
+              "Solid",
+              "0.4mm"
+            ],
+            "T": [
+              "Solid",
+              "0.12mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": null,
+            "style": "07_도표내용_본문혼합",
+            "header": false
+          }
+        ]
+      ],
+      "classes": {
+        "top": [
+          "Solid",
+          "0.4mm"
+        ],
+        "bottom": [
+          "Solid",
+          "0.4mm"
+        ],
+        "left": [
+          "Solid",
+          "0.4mm"
+        ],
+        "right": [
+          "Solid",
+          "0.4mm"
+        ],
+        "inner_h": [
+          "Solid",
+          "0.12mm"
+        ],
+        "inner_v": [
+          "Solid",
+          "0.12mm"
+        ],
+        "head_bottom": [
+          "Solid",
+          "0.4mm"
+        ]
+      },
+      "fills": {
+        "head_first": [
+          214,
+          214,
+          214
+        ],
+        "head": [
+          214,
+          214,
+          214
+        ],
+        "first": null,
+        "body": null
+      },
+      "styles": {
+        "head_first": "05_도표내용_항목제목",
+        "head": "05_도표내용_항목제목",
+        "first": "07_도표내용_본문혼합",
+        "body": "07_도표내용_본문혼합"
+      },
+      "header_cells": false,
+      "inside_margin": [
+        538,
+        538,
+        0,
+        0
+      ],
+      "col_ratio": [
+        0.2143,
+        0.7857
+      ],
+      "width_mm": null
+    },
+    "용어": {
+      "ref_id": "s1.t1",
+      "size": [
+        2,
+        3
+      ],
+      "cells": [
+        [
+          {
+            "L": [
+              "Solid",
+              "0.4mm"
+            ],
+            "R": [
+              "Solid",
+              "0.15mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": [
+              214,
+              214,
+              214
+            ],
+            "style": "05_도표내용_항목제목",
+            "header": true
+          },
+          {
+            "L": [
+              "Solid",
+              "0.15mm"
+            ],
+            "R": [
+              "Solid",
+              "0.15mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": [
+              214,
+              214,
+              214
+            ],
+            "style": "05_도표내용_항목제목",
+            "header": true
+          },
+          {
+            "L": [
+              "Solid",
+              "0.15mm"
+            ],
+            "R": [
+              "Solid",
+              "0.4mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": [
+              214,
+              214,
+              214
+            ],
+            "style": "05_도표내용_항목제목",
+            "header": true
+          }
+        ],
+        [
+          {
+            "L": [
+              "Solid",
+              "0.4mm"
+            ],
+            "R": [
+              "Solid",
+              "0.15mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": null,
+            "style": "06_도표내용_본문중앙",
+            "header": false
+          },
+          {
+            "L": [
+              "Solid",
+              "0.15mm"
+            ],
+            "R": [
+              "Solid",
+              "0.15mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": null,
+            "style": "06_도표내용_본문중앙",
+            "header": false
+          },
+          {
+            "L": [
+              "Solid",
+              "0.15mm"
+            ],
+            "R": [
+              "Solid",
+              "0.4mm"
+            ],
+            "T": [
+              "Solid",
+              "0.4mm"
+            ],
+            "B": [
+              "Solid",
+              "0.4mm"
+            ],
+            "fill": null,
+            "style": "06_도표내용_본문중앙",
+            "header": false
+          }
+        ]
+      ],
+      "classes": {
+        "top": [
+          "Solid",
+          "0.4mm"
+        ],
+        "bottom": [
+          "Solid",
+          "0.4mm"
+        ],
+        "left": [
+          "Solid",
+          "0.4mm"
+        ],
+        "right": [
+          "Solid",
+          "0.4mm"
+        ],
+        "inner_h": null,
+        "inner_v": [
+          "Solid",
+          "0.15mm"
+        ],
+        "head_bottom": [
+          "Solid",
+          "0.4mm"
+        ]
+      },
+      "fills": {
+        "head_first": [
+          214,
+          214,
+          214
+        ],
+        "head": [
+          214,
+          214,
+          214
+        ],
+        "first": null,
+        "body": null
+      },
+      "styles": {
+        "head_first": "05_도표내용_항목제목",
+        "head": "05_도표내용_항목제목",
+        "first": "06_도표내용_본문중앙",
+        "body": "06_도표내용_본문중앙"
+      },
+      "header_cells": true,
+      "inside_margin": [
+        141,
+        141,
+        141,
+        141
+      ],
+      "col_ratio": [
+        0.0714,
+        0.1429,
+        0.7857
+      ],
+      "width_mm": null
+    }
+  },
+  "body_styles": {
+    "center": "06_도표내용_본문중앙",
+    "mixed": "07_도표내용_본문혼합"
+  }
+}

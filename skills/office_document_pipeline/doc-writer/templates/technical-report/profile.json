@@ -1,0 +1,28 @@
+{
+  "id": "technical-report",
+  "version": 1,
+  "template": "template.package.zip",
+  "template_format": "HWPX",
+  "styles": {
+    "heading": "COMSAF 개요 {level}",
+    "para": "03_본문_내용",
+    "item": "03_본문_내용",
+    "need": "14_도움말_파란색",
+    "caption": "04_도표그림_제목",
+    "th": "05_도표내용_항목제목",
+    "td": "07_도표내용_본문혼합",
+    "anchor": "03_본문_내용",
+    "figure": "04_도표그림_제목"
+  },
+  "table_style": "table_style.json",
+  "description": "업무·기관 데이터가 없는 A4 기술문서 프리셋. 다른 서식은 별도 프로필로 지정한다.",
+  "model_hwpml": "model.hwpml",
+  "template_sha256": "16022b1e0a4ba930a8289f6f7de5f6f0062de828daeb55cec8df917c7018d458",
+  "model_sha256": "10c2c3db2eb79e094fbf08e4246de5acb871095e7f69afe7d499aa5afb78b3d1",
+  "validation": {
+    "structure": "passed",
+    "application_open": "unverified",
+    "layout": "unverified"
+  },
+  "model_validation": "template_model.compare_model: deterministic supported-field projection; unmodeled layout fields reported separately"
+}

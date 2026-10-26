@@ -1,0 +1,18 @@
+{
+  "aspect_ratio": "16:9",
+  "background": "#FFFFFF",
+  "primary": "#1B3A6B",
+  "secondary": "#2E6DA4",
+  "accent": "#C8962E",
+  "text": "#3D3D3D",
+  "surface": "#F4F7FC",
+  "success": "#2E7D51",
+  "warning": "#B85C1A",
+  "font_family": [
+    "맑은 고딕",
+    "Arial"
+  ],
+  "title_pt": 28,
+  "body_pt": 18,
+  "note": "RFP 또는 사용자 서식이 있으면 그 서식을 우선한다."
+}

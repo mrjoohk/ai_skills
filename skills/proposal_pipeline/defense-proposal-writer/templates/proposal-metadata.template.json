@@ -1,0 +1,17 @@
+{
+  "project_title": "",
+  "section": "overview",
+  "sources": {
+    "requirements": "",
+    "prep": "",
+    "kpi": "",
+    "wbs_schedule": "",
+    "prior_sections": []
+  },
+  "output_dir": "",
+  "output_formats": ["md"],
+  "template": "",
+  "status": "draft",
+  "source_tags": [],
+  "unresolved": []
+}

@@ -1,0 +1,59 @@
+    @unittest.skipUnless(
+        os.environ.get("DOC_WRITER_DRMHWP_PROFILE") == "1"
+        and (HERE.parents[2] / "output_docs" / "SUM" / "SUM_spec.md").is_file(),
+        "drmHWP SUM profile requires explicit opt-in and its project fixture",
+    )
+    def test_new_doc_spec_follows_sum_style(self):
+        """새 산출물 시작점 samples/new_doc_spec.md(doc-writer 스킬)는 마지막 SUM 과 같은 서식이다 — 템플릿·표 서식 파일·
+        스타일 바꿈(styles)이 SUM 명세와 같고, 표지 키와 양식 예시(front)의 찾을 글자(이름)가 같다 — 값은 문서마다 다르므로
+        견주지 않는다(사용자 지시 P-051 '마지막 SUM 작성할 때 사용한 스타일 템플릿을 반영'). 명세로 읽히고 첫 제목이 '개요'·
+        블록이 그 스타일로 계획된다. SUM 서식이 바뀌면 이 시험이 시작점도 함께 고치라고 알린다(검토 P-051 D1-③-05)."""
+        import json
+        import table_style as ts
+        root = HERE.parents[2]
+        meta, blocks = wd.parse_spec((HERE.parent / "samples" / "new_doc_spec.md").read_text(encoding="utf-8"))
+        sum_meta, _ = wd.parse_spec((root / "output_docs" / "SUM" / "SUM_spec.md").read_text(encoding="utf-8"))
+        pick = lambda m: (m.get("template"), m.get("table_style"), m.get("styles"), sorted(m.get("front") or {}),
+                          sorted(m.get("keys") or {}))
+        self.assertEqual(pick(meta), pick(sum_meta))
+        self.assertTrue(meta.get("table_style"))
+        self.assertFalse(ts.validate(json.loads((root / meta["table_style"]).read_text(encoding="utf-8"))))
+        self.assertEqual((blocks[0]["kind"], blocks[0]["text"]), ("heading", "개요"))
+        self.assertTrue(wd.plan(blocks, dict(wd.STYLES, **(meta.get("styles") or {})), pictures=True))
+
+    @unittest.skipUnless(
+        os.environ.get("DOC_WRITER_DRMHWP_PROFILE") == "1"
+        and (HERE.parents[2] / "output_docs" / "SUM" / "SUM_spec.md").is_file(),
+        "drmHWP SUM profile requires explicit opt-in and its project fixture",
+    )
+    def test_specs_cite_sections_by_current_numbers(self):
+        """저장소의 모든 명세(output_docs/*/*_spec.md)와 samples 는 인용({{표:}}·{{그림:}}·{{절:}})이 모두 풀리고(없는 제목·같은
+        제목·수준 건너뛴 제목은 명세 오류), text_checks 의 고칠 것이 0곳이다 — 글자 절 번호·단계 범위 넘침·글자 '표 N'·'그림 N'·
+        제목 수준 건너뜀(P-051). SUM 6.2 의 절 인용은 {{절:제목}} 이라 앞에 절이 늘어도 따라가고, 인용된 제목을 바꾸거나 지우면
+        이 시험이 실패한다(검토 P-051 D1-①-01·D2-①-01·D1F-02)."""
+        root = HERE.parents[2]
+        specs = sorted(root.glob("output_docs/*/*_spec.md")) + sorted((HERE.parent / "samples").glob("*.md"))
+        self.assertTrue([p for p in specs if p.name == "SUM_spec.md"])
+        for p in specs:
+            meta, blocks = wd.parse_spec(p.read_text(encoding="utf-8"))
+            try:
+                wd.plan(blocks, dict(wd.STYLES, **(meta.get("styles") or {})))
+            except wd.SpecError as e:
+                self.fail("%s: %s" % (p.name, e))
+            self.assertEqual(wd.text_check_problems(wd.text_checks(blocks)), [], p.name)
+
+    @unittest.skipUnless(
+        os.environ.get("DOC_WRITER_DRMHWP_PROFILE") == "1"
+        and (HERE.parents[2] / "output_docs" / "SUM" / "SUM_spec.md").is_file(),
+        "drmHWP SUM profile requires explicit opt-in and its project fixture",
+    )
+    def test_sum_step_ranges_pinned(self):
+        """SUM 의 단계 범위 16곳(절, 처음, 끝, 그 절 단계 수, 꼴)을 고정한다 — 6.2 의 {{절:}} 뒤 범위 15곳과 5.2.2 의 인용에 붙지
+        않은 '2)~5)는'(그 절 단계). 인용된 절에 단계가 늘거나 줄면(예 모의 시작에 9) 를 더함 — 범위 '2)~8)' 은 상한을 넘지 않아
+        text_checks 가 조용하다) 이 시험이 알리고, 사람이 범위를 고쳐 다시 고정한다(검토 P-051 D1F-01·D3-③-06)."""
+        _, blocks = wd.parse_spec((HERE.parents[2] / "output_docs" / "SUM" / "SUM_spec.md").read_text(encoding="utf-8"))
+        got = [(r["section"], r["title"], r["lo"], r["hi"], r["steps"], r["by"]) for r in wd.text_checks(blocks)["ranges"]]
+        self.assertEqual(got, [("5.2.2", "LAH 지면 충돌·헬리패드 아래 추락", 2, 5, 5, "local")]
+                         + [("4.3.4.1", "모의 시작", 2, 8, 8, "ref"), ("4.3.4.2.1", "편대기 경로 설정", 1, 5, 9, "ref"),
+                            ("4.3.4.2.1", "편대기 경로 설정", 6, 9, 9, "ref")] * 5)
+

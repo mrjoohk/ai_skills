@@ -1,0 +1,39 @@
+{
+  "review_date": "2026-10-25",
+  "scope": "Primary sources only; no business/project documents or templates",
+  "official_sources": [
+    {
+      "url": "https://www.hancom.com/support/downloadCenter/hwpOwpml",
+      "purpose": "Official format publication and attribution terms"
+    },
+    {
+      "url": "https://www.hancom.com/news/notice/detail/10924",
+      "purpose": "Official HWPX and OWPML KS X 6101 relationship"
+    },
+    {
+      "url": "https://github.com/hancom-io/hwpx-owpml-model",
+      "commit": "1453388472c703a4b299a0834f425cdac16644b9",
+      "license": "Apache-2.0 (no source code vendored into this prototype)",
+      "inspected_paths": [
+        "OWPMLApi/OWPMLSerialize.cpp",
+        "OWPML/Class/Head/HWPMLHeadType.cpp",
+        "OWPML/Class/Head/StyleType.cpp",
+        "OWPML/Class/Head/ParaShapeType.cpp",
+        "OWPML/Class/Head/paraProperties.cpp",
+        "OWPML/Class/Head/heading.cpp",
+        "OWPML/Class/Para/PType.cpp",
+        "OWPML/Class/Para/RunType.cpp",
+        "OWPML/Class/Para/SectionDefinitionType.cpp",
+        "OWPML/Class/Para/TableType.cpp",
+        "OWPML/Class/Para/AbstractShapeObjectType.cpp",
+        "OWPML/Class/Para/caption.cpp",
+        "OWPML/Class/Para/AutoNumNewNumType.cpp",
+        "OWPML/Class/Para/AutoNumFormatType.cpp",
+        "OWPML/Class/Etc/version.cpp"
+      ]
+    }
+  ],
+  "copy_policy": "Observed package layout, namespaces and reference metadata. Did not copy vendor binary/template XML into generated packages. Local inspection evidence is not a distribution dependency.",
+  "schema_validation": "Not performed: full authoritative OWPML XSD not retrieved",
+  "application_validation": "Not performed: COM application unavailable in the validation environment"
+}
